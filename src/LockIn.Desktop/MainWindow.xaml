@@ -1,0 +1,221 @@
+<Window x:Class="LockIn.Desktop.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="LockIn — Your study space" Width="1140" Height="740" MinWidth="620" MinHeight="540"
+ Background="{DynamicResource CanvasBrush}" FontFamily="Segoe UI" FontSize="14" Foreground="{DynamicResource InkBrush}">
+ <Window.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary Source="Resources/QuietStudy.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary></Window.Resources>
+ <DockPanel>
+  <StackPanel DockPanel.Dock="Top" Margin="24,12,24,0">
+   
+   <TextBlock x:Name="ModeBanner" Text="SIMULATION · Apps, websites and videos remain unrestricted" Foreground="#6C713F" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12"/>
+   <TextBlock x:Name="MessageText" TextWrapping="Wrap" Foreground="#92400E" Margin="0,0,0,12" AutomationProperties.LiveSetting="Polite">
+    <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed"/></Trigger></Style.Triggers></Style></TextBlock.Style>
+   </TextBlock>
+  </StackPanel>
+  <TabControl x:Name="Tabs" Style="{StaticResource Shell}" SelectionChanged="NavigationChanged">
+   <TabItem Header="_Focus" AutomationProperties.AutomationId="FocusTab">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel x:Name="FocusView">
+     <TextBlock x:Name="FocusHeading" Text="Make room for one thing." Style="{StaticResource Heading}"/>
+     <TextBlock x:Name="FocusSubtitle" Text="Set your boundaries. Choose your next small step." Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,0,0,24"/>
+     <Border x:Name="ReviewPanel" Visibility="Collapsed" Style="{StaticResource SurfaceCard}" Margin="0,0,0,20">
+      <StackPanel>
+       <TextBlock x:Name="ReviewText" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"/>
+       <TextBlock x:Name="ReviewTimingText" Style="{StaticResource SupportingText}"/>
+       <Border BorderBrush="{StaticResource InkBrush}" BorderThickness="3,0,0,0" Padding="12,4" Margin="0,8,0,12"><StackPanel>
+        <TextBlock x:Name="ReviewScopeHeading" FontWeight="SemiBold" Margin="0,0,0,4"/>
+        <TextBlock x:Name="ReviewScopeText" TextWrapping="Wrap"/>
+       </StackPanel></Border>
+       <TextBlock x:Name="ReviewRulesText" TextWrapping="Wrap" Margin="0,0,0,8"/>
+       <TextBlock x:Name="ReviewCommitmentText" Style="{StaticResource SupportingText}"/>
+       <Expander x:Name="ReviewRulesExpander" Header="Review exact rules" Margin="0,0,0,8"><TextBlock x:Name="ReviewDetailsText" TextWrapping="Wrap"/></Expander>
+       <WrapPanel><Button x:Name="ReviewBeginButton" Content="Begin countdown" Style="{StaticResource PrimaryButton}" Click="BeginReviewClick" AutomationProperties.AutomationId="ReviewBeginButton"/><Button x:Name="ReviewBackButton" Content="Back" Click="BackReviewClick"/></WrapPanel>
+      </StackPanel>
+     </Border>
+     <Grid x:Name="SessionLayout"><Grid.ColumnDefinitions><ColumnDefinition x:Name="SetupColumn" Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+      <Border x:Name="SetupPanel" Style="{StaticResource SurfaceCard}" Margin="0,0,16,0">
+       <StackPanel><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="3*"/><ColumnDefinition x:Name="DurationColumn" Width="0"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel x:Name="ProfileField"><TextBlock Text="Your focus profile" FontWeight="SemiBold"/>
+        <Grid><ComboBox x:Name="ProfilesBox" DisplayMemberPath="Name" SelectionChanged="ProfileSelectionChanged" AutomationProperties.Name="Saved profile" AutomationProperties.AutomationId="ProfilesBox"/>
+         <TextBlock x:Name="DraftProfileLabel" VerticalAlignment="Center" Margin="12,0,38,8" IsHitTestVisible="False" TextTrimming="CharacterEllipsis"><Run Text="New · "/><Run Text="{Binding Text, ElementName=NameBox}"/></TextBlock>
+        </Grid>
+        </StackPanel><StackPanel x:Name="DurationField" Grid.Row="1"><TextBlock Text="Minutes" FontWeight="SemiBold"/>
+        <ComboBox x:Name="FocusDurationBox" IsEditable="True" Text="{Binding Text, ElementName=DurationBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Focus duration in minutes" AutomationProperties.AutomationId="FocusDurationBox" Margin="0,8,0,4">
+         <ComboBoxItem Content="25"/><ComboBoxItem Content="45"/><ComboBoxItem Content="50"/><ComboBoxItem Content="60"/>
+        </ComboBox>
+        </StackPanel></Grid>
+        <TextBlock x:Name="DurationHint" Text="Choose a preset or type 1–480. Saved when you start." FontSize="12" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" Margin="0,4,0,12"/>
+        <WrapPanel>
+        <CheckBox x:Name="BrowserAlphaBox" Checked="ScopeChanged" Unchecked="ScopeChanged"><TextBlock Text="Use my paired browser (alpha)" TextWrapping="Wrap"/></CheckBox>
+        <Button Content="Edit profile &amp; rules" Click="EditClick" Style="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Margin="8,4,0,4"/>
+        </WrapPanel>
+       </StackPanel>
+      </Border>
+      <Border x:Name="SessionTicket" Grid.Column="1" Background="#E5EDCE" CornerRadius="8" Padding="24">
+       <StackPanel x:Name="TicketText">
+        <TextBlock x:Name="TicketLabel" Text="A LITTLE TIME, WELL SET ASIDE" FontSize="11" FontWeight="SemiBold"/>
+        <TextBlock x:Name="RemainingText" Text="25:00" FontFamily="Georgia" FontSize="68" Typography.NumeralAlignment="Tabular" Margin="0,14,0,12"/>
+        <ProgressBar x:Name="SessionProgress" Height="4" Maximum="100" Background="#81917B" Foreground="#DCE8B4" BorderThickness="0" Margin="0,0,0,14"/>
+        <TextBlock x:Name="StatusText" Text="Connecting…" FontSize="16" TextWrapping="Wrap" Margin="0,8" AutomationProperties.AutomationId="StatusText"/>
+        <TextBlock x:Name="DeadlineText" TextWrapping="Wrap" FontSize="13"/>
+        <TextBlock x:Name="CoverageText" TextWrapping="Wrap" Margin="0,12,0,0" AutomationProperties.LiveSetting="Polite"/>
+        <StackPanel x:Name="ReadinessPanel" Margin="0,12,0,0">
+         <TextBlock x:Name="ReadinessTitle" FontWeight="SemiBold" TextWrapping="Wrap" AutomationProperties.AutomationId="ReadinessTitle"/>
+         <TextBlock x:Name="ReadinessDetail" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/>
+         <Button x:Name="ReadinessAction" Click="ReadinessClick" Style="{StaticResource SecondaryButton}" HorizontalAlignment="Left" AutomationProperties.AutomationId="ReadinessAction"/>
+        </StackPanel>
+        <Button x:Name="StartButton" Content="_Start focus →" Click="StartClick" Style="{StaticResource PrimaryButton}" Margin="0,20,0,0" AutomationProperties.AutomationId="StartButton"/>
+        <Button x:Name="CancelCountdownButton" Content="Cancel countdown" Click="CancelCountdownClick" Visibility="Collapsed" AutomationProperties.AutomationId="CancelCountdownButton"/>
+        <Button x:Name="OpenResourcesButton" Content="Open study resources" Click="OpenResourcesClick" Background="#E1EBBD" Visibility="Collapsed" Margin="0,16,0,8"/>
+        <WrapPanel><Button x:Name="EndButton" Content="End early" Click="EndClick" Visibility="Collapsed"/><Button x:Name="CancelEndButton" Content="Keep focusing" Click="CancelEndClick" Visibility="Collapsed"/><Button x:Name="CleanupButton" Content="Retry cleanup" Click="RecoverClick" Visibility="Collapsed"/></WrapPanel>
+        <TextBlock x:Name="GuidedHint" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"/>
+       </StackPanel>
+      </Border>
+     </Grid>
+     <Expander x:Name="BoundariesExpander" Margin="0,24,0,0" AutomationProperties.Name="Session boundaries">
+      <Expander.Header><TextBlock x:Name="BoundaryHeading" Text="Your boundaries" TextWrapping="Wrap" FontWeight="SemiBold"/></Expander.Header>
+      <TextBlock x:Name="ProfileSummary" TextWrapping="Wrap" Margin="0,10,0,12"/>
+     </Expander>
+     <Expander x:Name="ResourcesExpander" Header="Study links" Margin="0,18,0,12"><StackPanel x:Name="ResourceLinks" Margin="0,12"/></Expander>
+     <TextBlock Text="Development build · Keep the background host running." Foreground="{StaticResource MutedBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,12"/>
+     
+    </StackPanel></ScrollViewer>
+   </TabItem>
+   <TabItem Header="_Profiles" AutomationProperties.AutomationId="ProfileTab">
+    <DockPanel x:Name="EditorPanel">
+     <StackPanel DockPanel.Dock="Top"><TextBlock x:Name="EditorHeading" Text="Profiles" Style="{StaticResource Heading}"/><TextBlock x:Name="EditorScopeText" Text="A few intentional choices, saved for next time." Foreground="{StaticResource MutedBrush}" Margin="0,0,0,12" TextWrapping="Wrap"/>
+      <Grid><ComboBox x:Name="EditorProfilesBox" ItemsSource="{Binding ItemsSource, ElementName=ProfilesBox}" SelectedItem="{Binding SelectedItem, ElementName=ProfilesBox, Mode=TwoWay}" DisplayMemberPath="Name" AutomationProperties.Name="Profile to edit"/>
+       <TextBlock VerticalAlignment="Center" Margin="12,0,38,8" IsHitTestVisible="False" Visibility="{Binding Visibility, ElementName=DraftProfileLabel}" TextTrimming="CharacterEllipsis"><Run Text="New · "/><Run Text="{Binding Text, ElementName=NameBox}"/></TextBlock>
+      </Grid>
+     </StackPanel>
+     <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0"><StackPanel><WrapPanel><Button x:Name="NewProfileButton" AutomationProperties.AutomationId="NewProfileButton" Content="New profile" Click="NewClick"/><Button x:Name="DuplicateProfileButton" AutomationProperties.AutomationId="DuplicateProfileButton" Content="Duplicate" Click="DuplicateClick"/><Button x:Name="SaveButton" Content="_Save profile" Style="{StaticResource PrimaryButton}" Click="SaveClick" AutomationProperties.AutomationId="SaveButton"/></WrapPanel><TextBlock x:Name="DraftStatusText" AutomationProperties.LiveSetting="Polite" Text="Changes affect the next session. Active rules stay frozen." Foreground="{StaticResource MutedBrush}" FontSize="12" TextWrapping="Wrap"/></StackPanel></Border>
+     <TabControl x:Name="EditorSections" Style="{StaticResource Sections}" SelectionChanged="EditorSectionChanged"><TabItem Header="Basics" AutomationProperties.AutomationId="EditorSection0"><ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Margin="4,4,16,20">       <TextBlock Text="Profile name"/><TextBox x:Name="NameBox" MaxLength="80" AutomationProperties.Name="Profile name" AutomationProperties.AutomationId="NameBox"/>
+       <TextBlock x:Name="NameError" Style="{StaticResource Error}"/>
+       <TextBlock Text="Duration in minutes"/>
+       <ComboBox x:Name="DurationBox" IsEditable="True" Text="25" AutomationProperties.Name="Duration in minutes" AutomationProperties.AutomationId="DurationBox">
+        <ComboBoxItem Content="1"/><ComboBoxItem Content="25"/><ComboBoxItem Content="45"/><ComboBoxItem Content="50"/><ComboBoxItem Content="60"/>
+       </ComboBox><TextBlock x:Name="DurationError" Style="{StaticResource Error}"/>
+       <TextBlock Text="Session mode"/>
+       <ComboBox x:Name="ModeBox" SelectedIndex="0" AutomationProperties.Name="Session mode">
+        <ComboBoxItem Content="Guided — end early after a 60-second delay" Tag="Guided"/>
+        <ComboBoxItem Content="Committed — ordinary early end unavailable" Tag="Committed"/>
+       </ComboBox>
+</StackPanel></ScrollViewer></TabItem>
+<TabItem Header="Apps" AutomationProperties.AutomationId="EditorSection1"><ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Margin="4,4,16,20">       <TextBlock Text="Application paths · simulation only"/>
+       <TextBlock Text="One absolute .exe path per line, or browse below. No apps are closed in this build." Style="{StaticResource SupportingText}"/><TextBox x:Name="AppsBox" Height="70" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" AutomationProperties.Name="Application paths"/>
+       <Button Content="Browse for an application…" Click="BrowseAppClick" HorizontalAlignment="Left"/>
+       <TextBlock x:Name="AppsError" Style="{StaticResource Error}"/>
+</StackPanel></ScrollViewer></TabItem>
+<TabItem Header="Websites" AutomationProperties.AutomationId="EditorSection2"><ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Margin="4,4,16,20">       <TextBlock Text="Website hosts · one per line"/>
+       <TextBlock Text="Includes subdomains. Prefix = for this host only (e.g. =example.com)." Style="{StaticResource SupportingText}"/><TextBox x:Name="SitesBox" Height="70" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" AutomationProperties.Name="Website hosts"/>
+       <TextBlock x:Name="SitesError" Style="{StaticResource Error}"/>
+</StackPanel></ScrollViewer></TabItem>
+<TabItem Header="YouTube" AutomationProperties.AutomationId="EditorSection3"><ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Margin="4,4,16,20">       <TextBlock Text="YouTube access"/>
+       <ComboBox x:Name="TagModeBox" SelectedIndex="0" AutomationProperties.Name="YouTube matching mode">
+        <ComboBoxItem Content="Only allow videos with a matching hashtag" Tag="allowMatchingTags"/>
+        <ComboBoxItem Content="Block matching hashtags (legacy behavior)" Tag="filterDistractions"/>
+       </ComboBox>
+       <TextBlock Text="One exact hashtag per line. In allow mode, any match permits a video; no match or unavailable metadata redirects." TextWrapping="Wrap" Foreground="#526071"/>
+       <TextBox x:Name="TermsBox" Height="96" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" AutomationProperties.Name="YouTube hashtag terms"/>
+       <TextBlock x:Name="TermsError" Style="{StaticResource Error}"/>
+       <Expander x:Name="VideoOptionsExpander" Header="Exceptions &amp; redirect settings" Margin="0,12,0,0"><StackPanel Margin="0,8"><TextBlock Text="Approved videos · one ID or YouTube URL per line"/>
+       <TextBox x:Name="ApprovedBox" Height="60" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" AutomationProperties.Name="Approved videos" AutomationProperties.AutomationId="ApprovedBox"/>
+       <TextBlock x:Name="ApprovedError" Style="{StaticResource Error}"/>
+       <TextBlock Text="When a video is not allowed"/>
+       <ComboBox x:Name="ActionBox" SelectedIndex="0" AutomationProperties.Name="YouTube tab action" AutomationProperties.AutomationId="ActionBox">
+        <ComboBoxItem Content="Redirect this tab" Tag="replaceCurrent"/><ComboBoxItem Content="Switch to an existing destination tab" Tag="switchExisting"/>
+        <ComboBoxItem Content="Open one replacement tab" Tag="openReplacement"/>
+       </ComboBox>
+       <TextBlock Text="Destination"/>
+       <ComboBox x:Name="DestinationBox" SelectedIndex="0" SelectionChanged="DestinationSelectionChanged" AutomationProperties.Name="YouTube destination" AutomationProperties.AutomationId="DestinationBox">
+        <ComboBoxItem Content="YouTube Home" Tag="youtubeHome"/><ComboBoxItem Content="Focus Page" Tag="focusPage"/><ComboBoxItem Content="Custom HTTPS destination" Tag="customHttps"/>
+       </ComboBox>
+       <StackPanel x:Name="CustomDestinationFields"><TextBlock Text="Custom destination · HTTPS" Style="{StaticResource SupportingText}"/><TextBox x:Name="DestinationUrlBox" AutomationProperties.Name="Custom destination URL" AutomationProperties.AutomationId="DestinationUrlBox"/></StackPanel>
+       <TextBlock x:Name="DestinationError" Style="{StaticResource Error}"/></StackPanel></Expander>
+       <Expander Header="Test a rule with sample metadata" IsExpanded="False" Margin="0,8">
+        <StackPanel>
+         <TextBlock Text="Video ID or URL (optional)"/><TextBox x:Name="PreviewVideoBox" AutomationProperties.Name="Preview video"/>
+         <TextBlock Text="Current video's hashtags, separated by spaces"/><TextBox x:Name="PreviewHashtagsBox" AutomationProperties.Name="Preview hashtags"/>
+         <CheckBox x:Name="MetadataUnavailableBox" Content="Hashtag metadata is unavailable"/>
+         <Button Content="Preview decision" Click="PreviewClick" HorizontalAlignment="Left"/>
+         <TextBlock x:Name="PreviewText" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+        </StackPanel>
+       </Expander></StackPanel></ScrollViewer></TabItem>
+<TabItem Header="Study links" AutomationProperties.AutomationId="EditorSection4"><ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Margin="4,4,16,20">       <TextBlock Text="Study links (one HTTPS URL per line)"/>
+       <TextBox x:Name="ResourcesBox" Height="70" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" AutomationProperties.Name="Study links" AutomationProperties.AutomationId="ResourcesBox"/>
+       <TextBlock x:Name="ResourcesError" Style="{StaticResource Error}"/>
+</StackPanel></ScrollViewer></TabItem></TabControl>
+    </DockPanel>
+   </TabItem>
+   <TabItem Header="_History" AutomationProperties.AutomationId="HistoryTab">
+    <DockPanel>
+     <StackPanel DockPanel.Dock="Top">
+      <TextBlock Text="Session journal" Style="{StaticResource Heading}"/>
+      <TextBlock Text="Latest 50 sessions · elapsed time, not verified study time." TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,12"/>
+      <TextBlock Text="Find a profile"/>
+      <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="HistorySearchBox" TextChanged="HistoryFilterChanged" AutomationProperties.Name="Search history by profile" Margin="0,8,12,8"/><Button x:Name="HistoryRefreshButton" Grid.Column="1" Content="Refresh" Click="HistoryClick" Style="{StaticResource SecondaryButton}" VerticalAlignment="Center"/></Grid>
+      <Expander x:Name="HistoryFiltersExpander" Header="Filter sessions" Margin="0,0,0,8"><WrapPanel>
+       <StackPanel Margin="0,0,12,0"><TextBlock Text="Coverage"/><ComboBox x:Name="HistoryScopeBox" Width="180" SelectedIndex="0" SelectionChanged="HistoryFilterChanged" AutomationProperties.Name="History coverage"><ComboBoxItem Content="All scopes" Tag="all"/><ComboBoxItem Content="Simulation" Tag="Simulation"/><ComboBoxItem Content="Browser alpha" Tag="Browser alpha"/></ComboBox></StackPanel>
+       <StackPanel Margin="0,0,12,0"><TextBlock Text="Started"/><ComboBox x:Name="HistoryPeriodBox" Width="160" SelectedIndex="0" SelectionChanged="HistoryFilterChanged" AutomationProperties.Name="History date range"><ComboBoxItem Content="All dates" Tag="all"/><ComboBoxItem Content="Today" Tag="today"/><ComboBoxItem Content="Last 7 days" Tag="week"/></ComboBox></StackPanel>
+       <Button Content="Clear filters" Click="ClearHistoryFiltersClick" VerticalAlignment="Center" AutomationProperties.AutomationId="ClearHistoryFiltersButton"/>
+       </WrapPanel></Expander>
+      <TextBlock x:Name="HistorySummaryText" FontWeight="SemiBold" Margin="0,0,0,12" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+     </StackPanel>
+     <Grid>
+      <TextBlock x:Name="HistoryEmptyText" Text="Refresh to load session history." TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" Margin="0,20"/>
+      <ListBox x:Name="HistoryList" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="Session history">
+       <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem"><Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="0,0,0,12"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/></Style></ListBox.ItemContainerStyle>
+       <ListBox.ItemTemplate><DataTemplate><Border Background="Transparent" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="0,12"><StackPanel>
+        <WrapPanel><TextBlock Text="{Binding ProfileName}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,16,4"/><TextBlock Text="{Binding Outcome}" VerticalAlignment="Center" FontSize="12"/></WrapPanel>
+        <WrapPanel><TextBlock Text="{Binding Started}" Foreground="{StaticResource MutedBrush}" Margin="0,0,16,4"/><TextBlock Text="{Binding Elapsed}" Margin="0,0,0,4"/></WrapPanel>
+        <TextBlock Text="{Binding Cleanup}" TextWrapping="Wrap" FontSize="12"/>
+        <Expander Header="Session details" Margin="0"><TextBlock Text="{Binding Details}" TextWrapping="Wrap"/></Expander>
+       </StackPanel></Border></DataTemplate></ListBox.ItemTemplate>
+      </ListBox>
+     </Grid>
+    </DockPanel>
+   </TabItem>
+   <TabItem Header="_Connections" AutomationProperties.AutomationId="BrowserTab">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
+     <TextBlock Text="Browser connection" Style="{StaticResource Heading}"/>
+     <TextBlock Text="Connect Brave, Chrome or Edge once." Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,0,0,24"/>
+     <Expander x:Name="BrowserSetupExpander" Header="Connect a browser" IsExpanded="True" Margin="0,0,0,20"><Border Style="{StaticResource SurfaceCard}" Margin="0,12,0,0"><StackPanel>
+      <TextBlock Text="1. Copy a setup code below.  2. Paste it into the LockIn extension." TextWrapping="Wrap" Margin="0,12"/>
+      <Button x:Name="PairBrowserButton" Content="Connect browser" Style="{StaticResource PrimaryButton}" Click="PairBrowserClick" HorizontalAlignment="Left"/>
+      <TextBlock x:Name="PairingText" FontSize="22" FontWeight="SemiBold" Margin="0,12,0,0" TextWrapping="Wrap"/>
+     </StackPanel></Border></Expander>
+     <Border x:Name="ConnectedBrowserCard" Style="{StaticResource SurfaceCard}"><StackPanel>
+      <TextBlock Text="YOUR BROWSER" FontSize="11" FontWeight="SemiBold" Foreground="#6B805D"/>
+      <ComboBox x:Name="BrowserBox" DisplayMemberPath="Label" SelectionChanged="BrowserSelectionChanged" AutomationProperties.Name="Paired browser" Margin="0,14,0,12"/>
+      <TextBlock x:Name="BrowserStatusText" Text="No browser paired yet." TextWrapping="Wrap" Margin="0,0,0,12"/>
+      <Button Content="Back to focus →" Click="BackToFocusClick" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left"/>
+      <Expander Header="Manage connection" Margin="0,12,0,0"><WrapPanel><Button x:Name="StageBrowserButton" AutomationProperties.AutomationId="StageBrowserButton" Content="Send profile again" Click="StageBrowserClick"/><Button Content="Check connection" Click="RefreshBrowsersClick"/><Button x:Name="RevokeBrowserButton" Content="Disconnect browser" Click="RevokeBrowserClick"/></WrapPanel></Expander>
+      <TextBlock Text="Approve requested site access in the extension, then start from Focus." TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" Margin="0,14,0,0"/>
+     </StackPanel></Border>
+
+     <TextBlock Text="Alpha coverage: selected sites and supported YouTube watch pages in this profile. Desktop apps, incognito, other profiles and unverified layouts remain outside coverage. Guided mode only." TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" Margin="0,20,0,0"/>
+    </StackPanel></ScrollViewer>
+   </TabItem>
+   <TabItem Header="_Help &amp; motion" AutomationProperties.AutomationId="HelpTab">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
+     <TextBlock Text="Help &amp; recovery" Style="{StaticResource Heading}"/>
+     <TextBlock Text="Keep your paired browser open until release is confirmed." TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,20"/>
+     <Border Style="{StaticResource SectionPanel}"><StackPanel>
+      <TextBlock Text="Connection and release" FontSize="20" FontWeight="SemiBold"/>
+      <TextBlock Text="Check the connection, or release an unfinished session." TextWrapping="Wrap" Margin="0,12"/>
+      <WrapPanel><Button Content="Check connection" Click="RefreshClick"/><Button x:Name="RecoveryButton" Content="Release / recover" Click="RecoverClick" IsEnabled="False"/></WrapPanel>
+     </StackPanel></Border>
+          <Border Style="{StaticResource SectionPanel}" Margin="0,20,0,0"><StackPanel>
+      <TextBlock Text="Extension removed or pairing lost?" FontFamily="Georgia" FontSize="23"/>
+      <TextBlock Text="First reopen the paired browser and use Release / recover. If the extension was removed or its pairing was lost, remove LockIn from that browser profile. After the original deadline, you can record that removal below. This is your confirmation, not automated proof of cleanup." TextWrapping="Wrap" Margin="0,12"/>
+      <CheckBox x:Name="RemovalConfirmedBox" Margin="0,8"><TextBlock Text="I removed the LockIn extension from the affected browser profile." TextWrapping="Wrap"/></CheckBox>
+      <Button x:Name="RemovalRecoveryButton" Content="Record extension removal" Click="ConfirmRemovalClick" HorizontalAlignment="Left" IsEnabled="False"/>
+     </StackPanel></Border>
+     <Border Style="{StaticResource SectionPanel}" Margin="0,20,0,0"><StackPanel>
+      <TextBlock Text="Motion preferences" FontSize="20" FontWeight="SemiBold"/>
+      <CheckBox x:Name="ReduceMotionBox" Content="Reduce motion for this window" Checked="MotionPreferenceChanged" Unchecked="MotionPreferenceChanged"/>
+      <TextBlock x:Name="MotionStatusText" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}"/>
+      <TextBlock Text="Windows reduced-motion settings take priority." TextWrapping="Wrap" Margin="0,12,0,0"/>
+     </StackPanel></Border>
+    </StackPanel></ScrollViewer>
+   </TabItem>
+  </TabControl>
+ </DockPanel>
+</Window>
