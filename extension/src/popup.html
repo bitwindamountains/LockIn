@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LockIn</title><link rel="stylesheet" href="popup.css"></head>
+<body class="popup"><main>
+ <header><span class="mark" aria-hidden="true">L</span><span class="wordmark">LockIn</span><span class="badge">BROWSER ALPHA</span></header>
+ <h1 id="heading">Your browser session</h1>
+ <section class="session-panel" aria-label="Session status"><div class="timer" id="timer">Checking connection…</div><p id="status" role="status">Connecting to LockIn…</p><p id="mode" class="muted"></p></section>
+ <section id="pairing" aria-label="Connect browser"><label for="code">Setup code</label><div class="row"><input id="code" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="6 digits" aria-describedby="code-help"><button id="pair">Connect</button></div><p id="code-help" class="muted">Copy a code from Connections in LockIn, then paste it here.</p><details><summary>Browser name</summary><label for="label">Name on your PC</label><input id="label" maxlength="80" value="Study browser"></details></section>
+ <section id="permissions" hidden aria-labelledby="access-heading"><h2 id="access-heading">Allow your selected sites</h2><ul id="origins"></ul><button id="grant" class="primary">Allow site access</button></section>
+ <p id="error" role="alert"></p>
+ <details><summary>Connection &amp; appearance</summary><p class="muted">Checks run automatically. Keep LockIn running during setup.</p><button id="sync" class="subtle">Check connection</button><label class="motion-setting"><input type="checkbox" id="reduce-motion"> Reduce motion</label></details>
+ <footer>This browser profile only.<details><summary>Coverage limits</summary>Incognito, other profiles, desktop apps and unsupported YouTube layouts are not covered.</details></footer>
+</main><script src="popup.js"></script></body></html>

@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LockIn.Core/LockIn.Core.csproj" />
+    <Project Path="src/LockIn.Desktop/LockIn.Desktop.csproj" />
+    <Project Path="src/LockIn.Infrastructure/LockIn.Infrastructure.csproj" />
+    <Project Path="src/LockIn.NativeHost/LockIn.NativeHost.csproj" />
+    <Project Path="src/LockIn.Service/LockIn.Service.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LockIn.Core.Tests/LockIn.Core.Tests.csproj" />
+  </Folder>
+</Solution>
