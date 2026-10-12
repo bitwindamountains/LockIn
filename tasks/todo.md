@@ -50,3 +50,34 @@
 - Verify: `npm test`, `npm run test:browser`
 - Files: `extension/src/background.ts`, `extension/tests/browser/enforcement.spec.ts`, `docs/STATUS.md`
 - Depends: 5 · Size: S
+
+## Task 7: R21-1 history rows with unknown times show "Date unknown"
+- Acceptance:
+  - [ ] `SessionHistoryItem.TimesKnown` is false for an unreadable row and true for readable and damaged-but-parseable rows
+  - [ ] History shows "Date unknown" and no deadline line when `TimesKnown` is false
+- Verify: `dotnet test`; Release build
+- Files: `src/LockIn.Core/Protocol.cs`, `src/LockIn.Desktop/MainWindow.History.cs`, `tests/LockIn.Core.Tests/BrowserAlphaTests.cs`
+- Depends: none · Size: S
+
+## Task 8: R21-2 recover prompt only promises 60 s when no early end is pending
+- Acceptance:
+  - [ ] Pressing Recover with a Guided end already pending shows the neutral prompt
+  - [ ] The desktop harness reads the dialog text in both cases
+- Verify: `scripts/test-desktop.ps1 -Configuration Release -BrowserRecovery`
+- Files: `src/LockIn.Desktop/MainWindow.xaml.cs`, `scripts/test-desktop.ps1`
+- Depends: none · Size: S
+
+## Task 9: R21-3 single unreadable-snapshot filter in LocalStore
+- Acceptance:
+  - [ ] One helper is used by `ListHistory` and `GetLatestBrowserSession`; existing tests stay green
+- Verify: `dotnet test`
+- Files: `src/LockIn.Infrastructure/LocalStore.cs`
+- Depends: 7 · Size: XS
+
+## Task 10: R21-4 remove `ListSessions()` and the `RecoverSimulation` alias
+- Acceptance:
+  - [ ] No production or test references remain; `RecoverSimulation` returns "Unknown command."
+  - [ ] Tests use `GetSession`, `ListHistory` and `RecoverSession` instead
+- Verify: `dotnet test`
+- Files: `src/LockIn.Infrastructure/LocalStore.cs`, `src/LockIn.Service/SimulationEngine.cs`, `tests/LockIn.Core.Tests/SimulationEngineTests.cs`, `tests/LockIn.Core.Tests/ReviewRegressionTests.cs`
+- Depends: 9 · Size: S
