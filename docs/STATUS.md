@@ -1,11 +1,12 @@
 # LockIn progress report
 
 **Updated:** 2026-10-13, review 20  
-**Stage:** Review defects fixed and regression checks passed.  
+**Stage:** Review 20 findings R20-1 to R20-6 fixed; regression checks passed.  
 **Release:** Developer alpha. **Not production ready.**
 
 ## Accomplished
 
+- **R20-5 fixed:** session status checks write the extension's stored cache at most once a second. Clock-rewind detection keeps its 2-second tolerance by also comparing against the latest time the worker saw.
 - **R20-4 fixed:** an unchanged policy no longer rewrites the extension's site rules or re-checks every open tab on each 5-second sync. Rules are compared by shape, as coverage already did, and the tab sweep runs once per session per worker.
 - **R20-6 fixed:** the host no longer exits when it cannot create its pipe endpoint; it logs, keeps reconciling and retries every second. A process test holds the pipe name first and confirms the host serves once it is free.
 - **R20-2 fixed:** History lists old session records that fail current validation as "Record could not be verified" instead of failing; nothing is deleted. Browser polling looks up its own latest readable session directly instead of validating the last 50 rows. Live-session reads stay strict.
@@ -22,14 +23,14 @@ See the [progress report and evidence](progress/2026-10-01-19-review-fixes.md). 
 | Check | Result |
 | --- | --- |
 | Release build | Passed, zero warnings/errors |
-| .NET suite | 49 passed |
+| .NET suite | 52 passed |
 | Extension typecheck/build | Passed |
 | Policy/content-script tests | 15 passed: 7 policy plus 8 fault/lifecycle cases |
-| Chromium enforcement/recovery/motion and presentation | 12 passed (website case includes a trailing-dot host; new unchanged-policy sync case) |
+| Chromium enforcement/recovery/motion and presentation | 13 passed (website case includes a trailing-dot host; new unchanged-policy sync and status-throttle cases) |
 | Expanded desktop design | Passed: deliberate window restoration, review action guards, browser staging guard, compact layouts and validation focus |
 | Desktop editor | Passed |
 | Desktop full session/history | Passed |
-| Desktop browser recovery | Passed using a simulated browser actor |
+| Desktop browser recovery | Passed using a simulated browser actor, including the Guided delay for live browser recovery |
 
 Four newly added fault cases failed before the retry fix. Final content-script tests cover error/rejected/malformed responses, backoff, deadline cleanup and late results after release/navigation. Browser fixtures are separate from installed Brave and live YouTube acceptance. The final small stale-error guard was verified by typecheck/build and the expanded content-script suite after the browser run.
 

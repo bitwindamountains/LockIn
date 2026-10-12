@@ -45,8 +45,8 @@
 
 ## Task 6: R20-5 `current()` storage write throttle
 - Acceptance:
-  - [ ] Calls to `current()` within 1 s cause no `storage.local.set`
-  - [ ] Rewind detection still works (existing cache test)
+  - [x] Calls to `current()` within 1 s cause no `storage.local.set`
+  - [x] Rewind detection still works (existing cache test)
 - Verify: `npm test`, `npm run test:browser`
 - Files: `extension/src/background.ts`, `extension/tests/browser/enforcement.spec.ts`, `docs/STATUS.md`
 - Depends: 5 · Size: S
