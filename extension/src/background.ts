@@ -15,6 +15,7 @@ let inFlight = new Set<number>();
 const redirected = new Map<number, string>();
 // Open tabs are swept once per session per worker; later navigation is covered by DNR, onUpdated and the registered content script.
 let sweptSessionId: string | null = null;
+let observed: { sessionId: string; lastUtc: number } | null = null;
 const initialize = chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' });
 const enqueue = <T>(work: () => Promise<T>): Promise<T> => {
   const next = serial.then(work, work); serial = next.catch(() => undefined); return next;
@@ -75,9 +76,14 @@ async function release(): Promise<void> {
 }
 async function current(): Promise<Cache | null> {
   const { cache, ended = [] } = await state();
-  if (!cacheValid(cache, Date.now()) || ended.includes(cache.policy.sessionId)) { if (cache) await release(); return null; }
-  cache.lastUtc = Math.max(cache.lastUtc, Date.now());
-  await chrome.storage.local.set({ cache });
+  const now = Date.now();
+  const stored = cache?.lastUtc ?? 0;
+  // Rewind detection uses the latest time this worker saw; storage is refreshed at most once a second.
+  if (cache && observed?.sessionId === cache.policy?.sessionId) cache.lastUtc = Math.max(cache.lastUtc, observed.lastUtc);
+  if (!cacheValid(cache, now) || ended.includes(cache.policy.sessionId)) { if (cache) await release(); return null; }
+  cache.lastUtc = Math.max(cache.lastUtc, now);
+  observed = { sessionId: cache.policy.sessionId, lastUtc: cache.lastUtc };
+  if (cache.lastUtc - stored >= 1000) await chrome.storage.local.set({ cache });
   return cache;
 }
 function ruleShape(rule: chrome.declarativeNetRequest.Rule): string {

@@ -148,6 +148,27 @@ test('syncs with an unchanged policy do not rewrite rules or sweep tabs again', 
     expect(await worker.evaluate(() => (globalThis as any).testPolls.at(-1))).toEqual({ appliedPolicyHash: 'a'.repeat(64), errorCode: null });
   } finally { await context.close(); }
 });
+test('frequent status checks do not rewrite the stored session cache', async () => {
+  const { context, worker, id } = await browser('replaceCurrent', true);
+  try {
+    const page = await context.newPage();
+    await page.goto(`chrome-extension://${id}/manifest.json`);
+    const status = () => page.evaluate(() => chrome.runtime.sendMessage({ type: 'PopupStatus' }));
+    await page.evaluate(() => chrome.runtime.sendMessage({ type: 'Sync' }));
+    await status();
+    await worker.evaluate(() => {
+      const counts = (globalThis as any).counts = { cacheWrites: 0 };
+      const set = chrome.storage.local.set.bind(chrome.storage.local);
+      chrome.storage.local.set = (data: any) => { if (data.cache) counts.cacheWrites++; return set(data); };
+    });
+    await status(); await status(); await status();
+    expect(await worker.evaluate(() => (globalThis as any).counts.cacheWrites)).toBe(0);
+    expect((await status()).policy?.sessionId).toBe('test-session');
+    // A clock rewind beyond 2 s still releases, even between throttled writes.
+    await worker.evaluate(() => { const real = Date.now; Date.now = () => real() - 3000; });
+    expect((await status()).policy).toBeNull();
+  } finally { await context.close(); }
+});
 test('storage failure during expiry cannot erase ownership and reactivate the session', async () => {
   const { context, worker, id } = await browser('replaceCurrent', true);
   try {
