@@ -92,8 +92,12 @@ public partial class MainWindow
         CleanupButton.Visibility = Show(_active is { State: SessionState.CleanupPending });
         OpenResourcesButton.Visibility = Show(_active is { State: SessionState.Active });
         SessionProgress.Visibility = Show(running);
-        SessionTicket.Background = Color(running ? "#203A2D" : "#E5EDCE");
-        TicketText.SetValue(TextElement.ForegroundProperty, Color(running ? "#F0F1E8" : "#20392C"));
+        SessionTicket.Background = running ? NightBrush : Color("#E5EDCE");
+        TicketText.SetValue(TextElement.ForegroundProperty, Color(running ? "#F4EFE0" : "#20392C"));
+        if (running) RemainingText.Foreground = Color("#F7D58A"); else RemainingText.ClearValue(TextBlock.ForegroundProperty);
+        // Idle two-column tickets are too narrow for the lamp beside the clock.
+        LampScene.Visibility = Show(compact || running || counting || ActualWidth >= 1080);
+        UpdateLamp(_active?.State is SessionState.Active ? "active" : _active?.State is SessionState.Releasing or SessionState.CleanupPending ? "attention" : "idle");
         FocusHeading.Text = _reviewing ? "Review session" : counting ? "Starting soon" : running ? "Focus in progress" : "Focus";
         FocusSubtitle.Text = _reviewing ? "Confirm what will apply to this session." : running ? "Rules are fixed. Edits apply to your next session." : "Choose your boundaries. Make time for one thing.";
         TicketLabel.Text = counting ? "NO RESTRICTIONS APPLIED YET" : running ? "TIME REMAINING" : "YOUR FOCUS WINDOW";
@@ -170,11 +174,53 @@ public partial class MainWindow
         if (MotionEnabled && Math.Abs(previous - value) < 10)
             SessionProgress.BeginAnimation(ProgressBar.ValueProperty, new DoubleAnimation(previous, value, TimeSpan.FromMilliseconds(250)) { FillBehavior = FillBehavior.Stop });
     }
+    private static readonly Brush NightBrush = new LinearGradientBrush((System.Windows.Media.Color)ColorConverter.ConvertFromString("#1B3125"), (System.Windows.Media.Color)ColorConverter.ConvertFromString("#12221A"), 70);
+    private string? _lampState;
+
+    // The lamp leans in and switches on for an active session; the bulb turns amber-red while cleanup needs attention.
+    private void UpdateLamp(string state)
+    {
+        if (_lampState == state) return;
+        var animate = _lampState is not null && MotionEnabled;
+        _lampState = state;
+        var on = state == "active";
+        BulbBrush.Color = (System.Windows.Media.Color)ColorConverter.ConvertFromString(on ? "#F7D58A" : state == "attention" ? "#E07A5F" : "#4B5A50");
+        StopLampMotion();
+        LampTilt.Angle = on ? 0 : -14;
+        LampGlow.Opacity = on ? 1 : 0;
+        if (!MotionEnabled) return;
+        if (animate)
+            LampTilt.BeginAnimation(RotateTransform.AngleProperty, new DoubleAnimation(on ? -14 : 0, on ? 0 : -14, TimeSpan.FromMilliseconds(900))
+                { EasingFunction = new BackEase { Amplitude = 0.6, EasingMode = EasingMode.EaseOut }, FillBehavior = FillBehavior.Stop });
+        if (!on) return;
+        var flicker = new DoubleAnimationUsingKeyFrames { BeginTime = TimeSpan.FromMilliseconds(animate ? 400 : 0), FillBehavior = FillBehavior.Stop };
+        foreach (var (ms, value) in new[] { (0, 0.0), (200, 0.75), (290, 0.1), (450, 0.9), (560, 0.35), (760, 1.0) })
+            flicker.KeyFrames.Add(new LinearDoubleKeyFrame(value, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(ms))));
+        LampGlow.BeginAnimation(OpacityProperty, flicker);
+        foreach (var (steam, delay) in new[] { (Steam1, 0), (Steam2, 1800) })
+        {
+            var fade = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever, BeginTime = TimeSpan.FromMilliseconds(delay) };
+            fade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.Zero)));
+            fade.KeyFrames.Add(new EasingDoubleKeyFrame(0.75, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(1260))));
+            fade.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(3600))));
+            steam.BeginAnimation(OpacityProperty, fade);
+            steam.RenderTransform.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(4, -12, TimeSpan.FromMilliseconds(3600)) { RepeatBehavior = RepeatBehavior.Forever, BeginTime = TimeSpan.FromMilliseconds(delay) });
+        }
+    }
+
+    private void StopLampMotion()
+    {
+        LampTilt.BeginAnimation(RotateTransform.AngleProperty, null);
+        LampGlow.BeginAnimation(OpacityProperty, null);
+        foreach (var steam in new[] { Steam1, Steam2 }) { steam.BeginAnimation(OpacityProperty, null); steam.RenderTransform.BeginAnimation(TranslateTransform.YProperty, null); }
+    }
+
     private void SystemMotionChanged(object? sender, PropertyChangedEventArgs e) => Dispatcher.InvokeAsync(() => MotionPreferenceChanged(this, new RoutedEventArgs()));
     private void MotionPreferenceChanged(object sender, RoutedEventArgs e)
     {
         if (!IsLoaded) return;
         var presenter = Tabs.Template.FindName("PART_SelectedContentHost", Tabs) as FrameworkElement;
+        _lampState = null; // Re-render the lamp at rest, or with motion, under the new preference.
         if (!MotionEnabled && presenter is not null) { presenter.BeginAnimation(OpacityProperty, null); presenter.Opacity = 1; presenter.RenderTransform = new TranslateTransform(); SessionProgress.BeginAnimation(ProgressBar.ValueProperty, null); MessageText.BeginAnimation(OpacityProperty, null); }
         UpdateFocusPresentation();
     }

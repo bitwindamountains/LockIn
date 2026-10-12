@@ -1,5 +1,7 @@
 import { initializeMotion } from './motion';
 import { coverageMessage } from './shared/presentation';
+import { renderScene, setSceneState } from './scene';
+renderScene();
 void initializeMotion();
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 let requestedOrigins: string[] = [];
@@ -13,6 +15,7 @@ async function refresh(): Promise<void> {
     if (!state || state.error) throw new Error(state?.error ?? 'Connection status unavailable.');
     const moveFocus = state.paired && element('pairing').contains(document.activeElement)
       || !state.needsPermissions && element('permissions').contains(document.activeElement);
+    setSceneState(state.policy ? 'active' : state.coverageIssue ? 'attention' : 'idle');
     element('status').textContent = coverageMessage(state.coverageIssue, state.message ?? 'Browser connection unavailable.');
     element('pairing').hidden = state.paired;
     element('heading').textContent = state.policy ? 'Stay with one thing.' : state.paired ? 'Your browser session' : 'Connect your browser';

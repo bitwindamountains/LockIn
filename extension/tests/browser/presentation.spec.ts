@@ -64,6 +64,11 @@ test('study pages fit six widths and polling preserves focused resource links', 
   await expect(link).toBeFocused();
   await page.waitForTimeout(5200); // Exercise one actual polling interval.
   await expect(link).toBeFocused();
+  // The lamp echoes the session state; with motion reduced it rests lit, with no animation.
+  await expect(page.locator('body')).toHaveAttribute('data-state', 'active');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  expect(await page.locator('.lamp-glow').evaluate(e => [getComputedStyle(e).opacity, getComputedStyle(e).animationName])).toEqual(['1', 'none']);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   for (const width of [320, 375, 768, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
