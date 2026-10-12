@@ -39,12 +39,19 @@ export function safeOrigins(value: unknown): value is string[] {
   return Array.isArray(value) && value.length <= 501 && value.every(v => typeof v === 'string' && /^(\*|https):\/\/(\*\.)?[a-z0-9][a-z0-9.-]*\/\*$/.test(v));
 }
 export function blockedHost(url: string, rules: SiteRule[]): boolean {
-  try { const u = new URL(url); return ['http:', 'https:'].includes(u.protocol) && rules.some(r => u.hostname === r.host || r.includeSubdomains && u.hostname.endsWith(`.${r.host}`)); } catch { return false; }
+  try {
+    const u = new URL(url); const host = u.hostname.replace(/\.$/, '');
+    return ['http:', 'https:'].includes(u.protocol) && rules.some(r => host === r.host || r.includeSubdomains && host.endsWith(`.${r.host}`));
+  } catch { return false; }
+}
+// `example.com.` is the same site as `example.com`; rules and content-script matches only see the canonical form.
+export function withoutTrailingDot(url: string): string | null {
+  try { const u = new URL(url); if (!['http:', 'https:'].includes(u.protocol) || !u.hostname.endsWith('.')) return null; u.hostname = u.hostname.slice(0, -1); return u.href; } catch { return null; }
 }
 export function compileSites(sites: SiteRule[]) {
   return sites.map((site, i) => ({
     id: 10000 + i, priority: 10, action: { type: 'redirect' as const, redirect: { extensionPath: '/blocked.html' } },
-    condition: { regexFilter: `^https?://${site.includeSubdomains ? '([^/.:]+\\.)*' : ''}${site.host.replaceAll('.', '\\.')}(:[0-9]+)?/`, resourceTypes: ['main_frame' as const], isUrlFilterCaseSensitive: false }
+    condition: { regexFilter: `^https?://${site.includeSubdomains ? '([^/.:]+\\.)*' : ''}${site.host.replaceAll('.', '\\.')}\\.?(:[0-9]+)?/`, resourceTypes: ['main_frame' as const], isUrlFilterCaseSensitive: false }
   }));
 }
 export function cacheValid(cache: Cache | null | undefined, now: number): cache is Cache {

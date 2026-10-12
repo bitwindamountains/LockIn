@@ -73,6 +73,8 @@ test('actual website rules install, redirect, and expire without a native host',
     const page = await context.newPage();
     await page.goto('https://example.test/').catch(() => undefined);
     await expect(page).toHaveURL(`chrome-extension://${id}/blocked.html`);
+    await page.goto('https://example.test./').catch(() => undefined);
+    await expect(page).toHaveURL(`chrome-extension://${id}/blocked.html`);
     await worker.evaluate(async () => { const { cache } = await chrome.storage.local.get('cache'); cache.deadline = Date.now() + 1000; await chrome.storage.local.set({ cache }); await chrome.alarms.create('lockin-expiry', { when: cache.deadline }); });
     await expect.poll(() => worker.evaluate(async () => (await chrome.declarativeNetRequest.getDynamicRules()).length), { timeout: 12000 }).toBe(0);
     expect(await worker.evaluate(async () => (await chrome.storage.local.get('cache')).cache)).toBeUndefined();
