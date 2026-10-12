@@ -6,6 +6,7 @@
 
 ## Accomplished
 
+- **R20-6 fixed:** the host no longer exits when it cannot create its pipe endpoint; it logs, keeps reconciling and retries every second. A process test holds the pipe name first and confirms the host serves once it is free.
 - **R20-2 fixed:** History lists old session records that fail current validation as "Record could not be verified" instead of failing; nothing is deleted. Browser polling looks up its own latest readable session directly instead of validating the last 50 rows. Live-session reads stay strict.
 - **R20-3 fixed:** Recover on an Active browser session now requests the 60-second Guided end, and the desktop prompt says so. It stays immediate for simulation and for sessions already releasing or pending cleanup. The engine test and desktop browser-recovery run cover it.
 - **R20-1 fixed:** a trailing-dot hostname (`example.com.`, `www.youtube.com.`) no longer bypasses website rules or the YouTube filter. Website rules and `blockedHost` accept the trailing dot; during a session, other trailing-dot pages are reloaded at their canonical host so YouTube content rules apply. Unit and Chromium regressions failed before the fix.
