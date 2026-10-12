@@ -129,6 +129,25 @@ test('coverage reports missing rules and refuses a locally expired policy with s
     expect(await worker.evaluate(() => (globalThis as any).testPolls.some((p: any) => p.errorCode === 'locallyReleased'))).toBe(true);
   } finally { await context.close(); }
 });
+test('syncs with an unchanged policy do not rewrite rules or sweep tabs again', async () => {
+  const { context, worker, id } = await browser('replaceCurrent', true);
+  try {
+    const page = await context.newPage();
+    await page.goto(`chrome-extension://${id}/manifest.json`);
+    const sync = () => page.evaluate(() => chrome.runtime.sendMessage({ type: 'Sync' }));
+    await sync();
+    await worker.evaluate(() => {
+      const counts = (globalThis as any).counts = { rules: 0, sweeps: 0 };
+      const update = chrome.declarativeNetRequest.updateDynamicRules.bind(chrome.declarativeNetRequest);
+      chrome.declarativeNetRequest.updateDynamicRules = (options: any) => { counts.rules++; return update(options); };
+      const query = chrome.tabs.query.bind(chrome.tabs);
+      chrome.tabs.query = (info: any) => { if (Object.keys(info).length === 0) counts.sweeps++; return query(info); };
+    });
+    await sync(); await sync(); await sync();
+    expect(await worker.evaluate(() => (globalThis as any).counts)).toEqual({ rules: 0, sweeps: 0 });
+    expect(await worker.evaluate(() => (globalThis as any).testPolls.at(-1))).toEqual({ appliedPolicyHash: 'a'.repeat(64), errorCode: null });
+  } finally { await context.close(); }
+});
 test('storage failure during expiry cannot erase ownership and reactivate the session', async () => {
   const { context, worker, id } = await browser('replaceCurrent', true);
   try {

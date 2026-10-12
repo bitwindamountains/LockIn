@@ -13,6 +13,8 @@ let coverageIssue: CoverageIssue | null = null;
 let syncQueued = false;
 let inFlight = new Set<number>();
 const redirected = new Map<number, string>();
+// Open tabs are swept once per session per worker; later navigation is covered by DNR, onUpdated and the registered content script.
+let sweptSessionId: string | null = null;
 const initialize = chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' });
 const enqueue = <T>(work: () => Promise<T>): Promise<T> => {
   const next = serial.then(work, work); serial = next.catch(() => undefined); return next;
@@ -82,17 +84,20 @@ function ruleShape(rule: chrome.declarativeNetRequest.Rule): string {
   return JSON.stringify([rule.id, rule.priority, rule.action.type, rule.action.redirect?.extensionPath,
     rule.condition.regexFilter, rule.condition.resourceTypes, rule.condition.isUrlFilterCaseSensitive]);
 }
+function sameRules(installed: chrome.declarativeNetRequest.Rule[], expected: ReturnType<typeof compileSites>): boolean {
+  const shapes = (rules: chrome.declarativeNetRequest.Rule[]) => JSON.stringify(rules.filter(r => ownedRule(r.id)).map(ruleShape).sort());
+  return shapes(installed) === shapes(expected as chrome.declarativeNetRequest.Rule[]);
+}
 async function coverage(): Promise<{ appliedSessionId: string | null; appliedPolicyHash: string | null; errorCode: CoverageIssue | null }> {
   const cache = await current();
   if (!cache) return { appliedSessionId: null, appliedPolicyHash: null, errorCode: coverageIssue };
   if (!await chrome.permissions.contains({ origins: originsFor(cache.policy) }))
     return { appliedSessionId: null, appliedPolicyHash: null, errorCode: 'permissionMissing' };
-  const rules = (await chrome.declarativeNetRequest.getDynamicRules()).filter(r => ownedRule(r.id)).map(ruleShape).sort();
-  const expected = compileSites(cache.policy.websites).map(r => ruleShape(r as chrome.declarativeNetRequest.Rule)).sort();
+  const rulesMatch = sameRules(await chrome.declarativeNetRequest.getDynamicRules(), compileSites(cache.policy.websites));
   const scripts = await chrome.scripting.getRegisteredContentScripts();
   const youtubeReady = !originsFor(cache.policy).includes('https://www.youtube.com/*') ||
     scripts.some(s => s.id === 'lockin-youtube' && s.js?.includes('content.js') && s.matches?.includes('https://www.youtube.com/*'));
-  if (JSON.stringify(rules) !== JSON.stringify(expected) || !youtubeReady)
+  if (!rulesMatch || !youtubeReady)
     return { appliedSessionId: null, appliedPolicyHash: null, errorCode: 'applyFailed' };
   return { appliedSessionId: cache.policy.sessionId, appliedPolicyHash: cache.policy.policyHash, errorCode: null };
 }
@@ -107,7 +112,7 @@ async function apply(policy: Policy): Promise<void> {
   await chrome.storage.local.set({ cache });
   const existing = await chrome.declarativeNetRequest.getDynamicRules();
   const expected = compileSites(policy.websites);
-  if (JSON.stringify(existing.filter(r => ownedRule(r.id))) !== JSON.stringify(expected))
+  if (!sameRules(existing, expected))
     await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: existing.filter(r => ownedRule(r.id)).map(r => r.id), addRules: expected as chrome.declarativeNetRequest.Rule[] });
   await chrome.alarms.create('lockin-expiry', { when: deadline });
   if (originsFor(policy).includes('https://www.youtube.com/*')) {
@@ -115,13 +120,14 @@ async function apply(policy: Policy): Promise<void> {
     if (!scripts.some(s => s.id === 'lockin-youtube'))
       await chrome.scripting.registerContentScripts([{ id: 'lockin-youtube', matches: ['https://www.youtube.com/*'], js: ['content.js'], runAt: 'document_start', persistAcrossSessions: true }]);
   }
-  {
+  if (sweptSessionId !== policy.sessionId) {
     for (const tab of await chrome.tabs.query({})) {
       if (tab.id === undefined || !tab.url || !cacheValid(cache, Date.now())) continue;
       if (blockedHost(tab.url, policy.websites)) await chrome.tabs.update(tab.id, { url: chrome.runtime.getURL('blocked.html') });
       else if (tab.url.startsWith('https://www.youtube.com/') && originsFor(policy).includes('https://www.youtube.com/*'))
         await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content.js'] }).catch(() => undefined);
     }
+    sweptSessionId = policy.sessionId;
   }
 }
 async function synchronize(): Promise<void> {

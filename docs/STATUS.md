@@ -6,6 +6,7 @@
 
 ## Accomplished
 
+- **R20-4 fixed:** an unchanged policy no longer rewrites the extension's site rules or re-checks every open tab on each 5-second sync. Rules are compared by shape, as coverage already did, and the tab sweep runs once per session per worker.
 - **R20-6 fixed:** the host no longer exits when it cannot create its pipe endpoint; it logs, keeps reconciling and retries every second. A process test holds the pipe name first and confirms the host serves once it is free.
 - **R20-2 fixed:** History lists old session records that fail current validation as "Record could not be verified" instead of failing; nothing is deleted. Browser polling looks up its own latest readable session directly instead of validating the last 50 rows. Live-session reads stay strict.
 - **R20-3 fixed:** Recover on an Active browser session now requests the 60-second Guided end, and the desktop prompt says so. It stays immediate for simulation and for sessions already releasing or pending cleanup. The engine test and desktop browser-recovery run cover it.
@@ -24,7 +25,7 @@ See the [progress report and evidence](progress/2026-10-01-19-review-fixes.md). 
 | .NET suite | 49 passed |
 | Extension typecheck/build | Passed |
 | Policy/content-script tests | 15 passed: 7 policy plus 8 fault/lifecycle cases |
-| Chromium enforcement/recovery/motion and presentation | 11 passed (website case now includes a trailing-dot host) |
+| Chromium enforcement/recovery/motion and presentation | 12 passed (website case includes a trailing-dot host; new unchanged-policy sync case) |
 | Expanded desktop design | Passed: deliberate window restoration, review action guards, browser staging guard, compact layouts and validation focus |
 | Desktop editor | Passed |
 | Desktop full session/history | Passed |
