@@ -320,7 +320,7 @@ try {
         Start-Sleep -Milliseconds 300
         Save-WindowImage 'compact-focus.png'
         $startBounds = (Find-Control 'StartButton').Current.BoundingRectangle
-        if ((Find-Control 'StartButton').Current.IsOffscreen -or $startBounds.Bottom -gt (Window-Root).Current.BoundingRectangle.Bottom - 18) { throw 'Start is clipped in the compact Focus view.' }
+        if ((Find-Control 'StartButton').Current.IsOffscreen -or $startBounds.Bottom -gt (Window-Root).Current.BoundingRectangle.Bottom - 18) { throw "Start is clipped in the compact Focus view (bottom $($startBounds.Bottom), limit $((Window-Root).Current.BoundingRectangle.Bottom - 18), offscreen $((Find-Control 'StartButton').Current.IsOffscreen))." }
         Select-Tab 'ProfileTab'
         Select-Tab 'EditorSection3'
         Set-Value 'TermsBox' ''

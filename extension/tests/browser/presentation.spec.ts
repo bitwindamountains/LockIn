@@ -5,8 +5,8 @@ import path from 'node:path';
 // Presentation fixtures only: no native host or actual restriction is claimed here.
 test.beforeEach(async ({ page }) => {
   await page.route('https://lockin.test/**', async route => {
-    const file = path.basename(new URL(route.request().url()).pathname);
-    const mime = file.endsWith('.css') ? 'text/css' : file.endsWith('.js') ? 'text/javascript' : 'text/html';
+    const file = new URL(route.request().url()).pathname.slice(1);
+    const mime = file.endsWith('.css') ? 'text/css' : file.endsWith('.js') ? 'text/javascript' : file.endsWith('.woff2') ? 'font/woff2' : 'text/html';
     await route.fulfill({ contentType: mime, body: await readFile(path.resolve('dist', file)) });
   });
   await page.addInitScript(() => {
@@ -64,10 +64,11 @@ test('study pages fit six widths and polling preserves focused resource links', 
   await expect(link).toBeFocused();
   await page.waitForTimeout(5200); // Exercise one actual polling interval.
   await expect(link).toBeFocused();
-  // The lamp echoes the session state; with motion reduced it rests lit, with no animation.
+  // The eclipse echoes the session state; with motion reduced it rests total, with no animation.
   await expect(page.locator('body')).toHaveAttribute('data-state', 'active');
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  expect(await page.locator('.lamp-glow').evaluate(e => [getComputedStyle(e).opacity, getComputedStyle(e).animationName])).toEqual(['1', 'none']);
+  expect(await page.locator('.corona').evaluate(e => [getComputedStyle(e).opacity, getComputedStyle(e).animationName])).toEqual(['1', 'none']);
+  expect(await page.locator('.moon').evaluate(e => getComputedStyle(e).transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   for (const width of [320, 375, 768, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });

@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\Fonts\*.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../LockIn.Core/LockIn.Core.csproj" />
   </ItemGroup>
 

@@ -1,12 +1,17 @@
 <Window x:Class="LockIn.Desktop.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="LockIn — Your study space" Width="1140" Height="740" MinWidth="620" MinHeight="540"
- Background="{DynamicResource CanvasBrush}" FontFamily="Segoe UI" FontSize="14" Foreground="{DynamicResource InkBrush}">
+ Background="{DynamicResource CanvasBrush}" FontFamily="{DynamicResource SansFont}" FontSize="14" Foreground="{DynamicResource InkBrush}">
  <Window.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary Source="Resources/QuietStudy.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary></Window.Resources>
+ <Grid>
+ <!-- Aurora: violet and ember light washes over the night canvas. Decorative only. -->
+ <Rectangle IsHitTestVisible="False"><Rectangle.Fill><RadialGradientBrush Center="0.08,0" GradientOrigin="0.08,0" RadiusX="0.55" RadiusY="0.6"><GradientStop Color="#3D7B6CFF" Offset="0"/><GradientStop Color="#007B6CFF" Offset="1"/></RadialGradientBrush></Rectangle.Fill></Rectangle>
+ <Rectangle IsHitTestVisible="False"><Rectangle.Fill><RadialGradientBrush Center="0.95,0.04" GradientOrigin="0.95,0.04" RadiusX="0.45" RadiusY="0.5"><GradientStop Color="#2BFF7A45" Offset="0"/><GradientStop Color="#00FF7A45" Offset="1"/></RadialGradientBrush></Rectangle.Fill></Rectangle>
+ <Rectangle IsHitTestVisible="False"><Rectangle.Fill><RadialGradientBrush Center="0.6,1.1" GradientOrigin="0.6,1.1" RadiusX="0.7" RadiusY="0.5"><GradientStop Color="#1A40AAFF" Offset="0"/><GradientStop Color="#0040AAFF" Offset="1"/></RadialGradientBrush></Rectangle.Fill></Rectangle>
  <DockPanel>
   <StackPanel DockPanel.Dock="Top" Margin="24,12,24,0">
    
-   <TextBlock x:Name="ModeBanner" Text="SIMULATION · Apps, websites and videos remain unrestricted" Foreground="#6C713F" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12"/>
-   <TextBlock x:Name="MessageText" TextWrapping="Wrap" Foreground="#92400E" Margin="0,0,0,12" AutomationProperties.LiveSetting="Polite">
+   <TextBlock x:Name="ModeBanner" Text="SIMULATION · Apps, websites and videos remain unrestricted" Foreground="{StaticResource MutedBrush}" FontFamily="{StaticResource MonoFont}" FontSize="11.5" TextWrapping="Wrap" Margin="0,0,0,8"/>
+   <TextBlock x:Name="MessageText" TextWrapping="Wrap" Foreground="#FFB27A" Margin="0,0,0,8" AutomationProperties.LiveSetting="Polite">
     <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><Trigger Property="Text" Value=""><Setter Property="Visibility" Value="Collapsed"/></Trigger></Style.Triggers></Style></TextBlock.Style>
    </TextBlock>
   </StackPanel>
@@ -48,37 +53,26 @@
         </WrapPanel>
        </StackPanel>
       </Border>
-      <Border x:Name="SessionTicket" Grid.Column="1" Background="#E5EDCE" CornerRadius="8" Padding="24">
+      <Border x:Name="SessionTicket" Grid.Column="1" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="22" Padding="26">
        <StackPanel x:Name="TicketText">
-        <TextBlock x:Name="TicketLabel" Text="A LITTLE TIME, WELL SET ASIDE" FontSize="11" FontWeight="SemiBold"/>
+        <TextBlock x:Name="TicketLabel" Text="A LITTLE TIME, WELL SET ASIDE" FontFamily="{StaticResource MonoFont}" FontSize="11" Foreground="{StaticResource MutedBrush}"/>
         <Grid>
          <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-         <TextBlock x:Name="RemainingText" Text="25:00" FontFamily="Georgia" FontSize="68" Typography.NumeralAlignment="Tabular" Margin="0,14,0,12"/>
-         <!-- Decorative study lamp: echoes session state already stated in text; motion is presentation only. -->
-         <Viewbox x:Name="LampScene" Grid.Column="1" Height="{Binding ActualHeight, ElementName=RemainingText}" Stretch="Uniform" VerticalAlignment="Center" Margin="12,0,0,0" IsHitTestVisible="False">
-          <Canvas Width="270" Height="122" ClipToBounds="True"><Canvas Canvas.Left="-40" Canvas.Top="-50">
-           <Path x:Name="LampGlow" Data="M124,70 L140,82 L258,158 L104,158 Z" Opacity="0"><Path.Fill><RadialGradientBrush Center="0.3,0" GradientOrigin="0.3,0" RadiusX="1" RadiusY="1"><GradientStop Color="#E6F7D58A" Offset="0"/><GradientStop Color="#29F2B84B" Offset="0.7"/><GradientStop Color="#00F2B84B" Offset="1"/></RadialGradientBrush></Path.Fill></Path>
-           <Rectangle Canvas.Left="40" Canvas.Top="158" Width="270" Height="10" RadiusX="2" RadiusY="2"><Rectangle.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#000C1812" Offset="0"/><GradientStop Color="#990C1812" Offset="0.15"/><GradientStop Color="#990C1812" Offset="0.85"/><GradientStop Color="#000C1812" Offset="1"/></LinearGradientBrush></Rectangle.Fill></Rectangle>
-           <Path x:Name="BookLeft" Data="M150,156 C168,149 188,149 208,155 L208,121 C188,115 168,115 150,122 Z" Fill="#EFE6CF" Stroke="#C9BB96" StrokeThickness="1"/>
-           <Path Data="M208,155 C228,149 248,149 266,156 L266,122 C248,115 228,115 208,121 Z" Fill="#EFE6CF" Stroke="#C9BB96" StrokeThickness="1"/>
-           <Path Data="M160,130 C172,126 186,126 198,129 M160,138 C172,134 186,134 198,137 M218,129 C230,126 244,126 256,130 M218,137 C230,134 240,134 248,136" Stroke="#9AA79A" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-           <Path Data="M222,163 L282,151 L286,155 L226,167 Z" Fill="#F2B84B"/>
-           <Ellipse Canvas.Left="44" Canvas.Top="151" Width="52" Height="10" Fill="#2F5A42"/>
-           <Path Data="M70,152 L84,100" Stroke="#3D6B51" StrokeThickness="5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-           <Canvas><Canvas.RenderTransform><RotateTransform x:Name="LampTilt" CenterX="84" CenterY="100" Angle="-14"/></Canvas.RenderTransform>
-            <Path Data="M84,100 L120,72" Stroke="#3D6B51" StrokeThickness="5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-            <Path Data="M112,58 L142,68 L132,88 Z" Fill="#2F5A42"/>
-            <Ellipse Canvas.Left="127" Canvas.Top="75" Width="10" Height="10"><Ellipse.Fill><SolidColorBrush x:Name="BulbBrush" Color="#4B5A50"/></Ellipse.Fill></Ellipse>
-            <Ellipse Canvas.Left="79.5" Canvas.Top="95.5" Width="9" Height="9" Fill="#6B9A7B"/>
-           </Canvas>
-           <Path Data="M276,132 H298 V150 A6,6 0 0 1 292,156 H282 A6,6 0 0 1 276,150 Z" Fill="#C9D8B4"/>
-           <Path Data="M298,137 A6,6 0 0 1 298,149" Stroke="#C9D8B4" StrokeThickness="3"/>
-           <Path x:Name="Steam1" Data="M283,126 C279,120 287,116 283,108" Stroke="#EFE8D2" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Opacity="0"><Path.RenderTransform><TranslateTransform/></Path.RenderTransform></Path>
-           <Path x:Name="Steam2" Data="M291,126 C287,120 295,116 291,108" Stroke="#EFE8D2" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Opacity="0"><Path.RenderTransform><TranslateTransform/></Path.RenderTransform></Path>
-          </Canvas></Canvas>
+         <TextBlock x:Name="RemainingText" Text="25:00" FontFamily="{StaticResource MonoFont}" FontWeight="Light" FontSize="68" Typography.NumeralAlignment="Tabular" VerticalAlignment="Center" Margin="0,14,0,12"/>
+         <!-- Decorative eclipse: echoes the session state already stated in text; motion is presentation only. -->
+         <Viewbox x:Name="EclipseScene" Grid.Column="1" Height="96" Stretch="Uniform" VerticalAlignment="Center" Margin="12,0,0,0" IsHitTestVisible="False">
+          <Grid Width="400" Height="400">
+           <Ellipse x:Name="Corona" Width="396" Height="396" Opacity="0.3" RenderTransformOrigin="0.5,0.5"><Ellipse.RenderTransform><ScaleTransform x:Name="CoronaScale"/></Ellipse.RenderTransform>
+            <Ellipse.Fill><RadialGradientBrush><GradientStop x:Name="CoronaInner" Color="#F2FFE0A3" Offset="0.54"/><GradientStop x:Name="CoronaMid" Color="#99FFA35C" Offset="0.6"/><GradientStop x:Name="CoronaOuter" Color="#2EFF6B3D" Offset="0.76"/><GradientStop Color="#00FF6B3D" Offset="1"/></RadialGradientBrush></Ellipse.Fill></Ellipse>
+           <Ellipse Width="224" Height="224"><Ellipse.Fill><RadialGradientBrush Center="0.38,0.34" GradientOrigin="0.38,0.34"><GradientStop Color="#FFF6DC" Offset="0"/><GradientStop Color="#FFC66E" Offset="0.55"/><GradientStop Color="#FF7E45" Offset="1"/></RadialGradientBrush></Ellipse.Fill></Ellipse>
+           <Grid Width="234" Height="234"><Grid.RenderTransform><TranslateTransform x:Name="MoonShift" X="64" Y="-30"/></Grid.RenderTransform>
+            <Ellipse><Ellipse.Fill><RadialGradientBrush Center="0.36,0.3" GradientOrigin="0.36,0.3"><GradientStop Color="#1C1F2E" Offset="0"/><GradientStop Color="#0B0C13" Offset="0.7"/><GradientStop Color="#06070B" Offset="1"/></RadialGradientBrush></Ellipse.Fill></Ellipse>
+            <Ellipse Stroke="#38FFE2B4" StrokeThickness="1.4"/></Grid>
+           <Ellipse x:Name="Bead" Width="12" Height="12" Fill="#FFF8E6" Opacity="0"><Ellipse.RenderTransform><TranslateTransform X="80" Y="-84"/></Ellipse.RenderTransform><Ellipse.Effect><DropShadowEffect Color="White" BlurRadius="18" ShadowDepth="0" Opacity="1"/></Ellipse.Effect></Ellipse>
+          </Grid>
          </Viewbox>
         </Grid>
-        <ProgressBar x:Name="SessionProgress" Height="4" Maximum="100" Background="#3A5747" Foreground="#F2B84B" BorderThickness="0" Margin="0,0,0,14"/>
+        <ProgressBar x:Name="SessionProgress" Height="4" Maximum="100" Margin="0,0,0,14"/>
         <TextBlock x:Name="StatusText" Text="Connecting…" FontSize="16" TextWrapping="Wrap" Margin="0,8" AutomationProperties.AutomationId="StatusText"/>
         <TextBlock x:Name="DeadlineText" TextWrapping="Wrap" FontSize="13"/>
         <TextBlock x:Name="CoverageText" TextWrapping="Wrap" Margin="0,12,0,0" AutomationProperties.LiveSetting="Polite"/>
@@ -89,7 +83,7 @@
         </StackPanel>
         <Button x:Name="StartButton" Content="_Start focus →" Click="StartClick" Style="{StaticResource PrimaryButton}" Margin="0,20,0,0" AutomationProperties.AutomationId="StartButton"/>
         <Button x:Name="CancelCountdownButton" Content="Cancel countdown" Click="CancelCountdownClick" Visibility="Collapsed" AutomationProperties.AutomationId="CancelCountdownButton"/>
-        <Button x:Name="OpenResourcesButton" Content="Open study resources" Click="OpenResourcesClick" Background="#E1EBBD" Visibility="Collapsed" Margin="0,16,0,8"/>
+        <Button x:Name="OpenResourcesButton" Content="Open study resources" Click="OpenResourcesClick" Style="{StaticResource PrimaryButton}" Visibility="Collapsed" Margin="0,16,0,8"/>
         <WrapPanel><Button x:Name="EndButton" Content="End early" Click="EndClick" Visibility="Collapsed"/><Button x:Name="CancelEndButton" Content="Keep focusing" Click="CancelEndClick" Visibility="Collapsed"/><Button x:Name="CleanupButton" Content="Retry cleanup" Click="RecoverClick" Visibility="Collapsed"/></WrapPanel>
         <TextBlock x:Name="GuidedHint" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"/>
        </StackPanel>
@@ -138,7 +132,7 @@
         <ComboBoxItem Content="Only allow videos with a matching hashtag" Tag="allowMatchingTags"/>
         <ComboBoxItem Content="Block matching hashtags (legacy behavior)" Tag="filterDistractions"/>
        </ComboBox>
-       <TextBlock Text="One exact hashtag per line. In allow mode, any match permits a video; no match or unavailable metadata redirects." TextWrapping="Wrap" Foreground="#526071"/>
+       <TextBlock Text="One exact hashtag per line. In allow mode, any match permits a video; no match or unavailable metadata redirects." TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}"/>
        <TextBox x:Name="TermsBox" Height="96" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" AutomationProperties.Name="YouTube hashtag terms"/>
        <TextBlock x:Name="TermsError" Style="{StaticResource Error}"/>
        <Expander x:Name="VideoOptionsExpander" Header="Exceptions &amp; redirect settings" Margin="0,12,0,0"><StackPanel Margin="0,8"><TextBlock Text="Approved videos · one ID or YouTube URL per line"/>
@@ -208,7 +202,7 @@
       <TextBlock x:Name="PairingText" FontSize="22" FontWeight="SemiBold" Margin="0,12,0,0" TextWrapping="Wrap"/>
      </StackPanel></Border></Expander>
      <Border x:Name="ConnectedBrowserCard" Style="{StaticResource SurfaceCard}"><StackPanel>
-      <TextBlock Text="YOUR BROWSER" FontSize="11" FontWeight="SemiBold" Foreground="#6B805D"/>
+      <TextBlock Text="YOUR BROWSER" FontFamily="{StaticResource MonoFont}" FontSize="11" Foreground="{StaticResource MutedBrush}"/>
       <ComboBox x:Name="BrowserBox" DisplayMemberPath="Label" SelectionChanged="BrowserSelectionChanged" AutomationProperties.Name="Paired browser" Margin="0,14,0,12"/>
       <TextBlock x:Name="BrowserStatusText" Text="No browser paired yet." TextWrapping="Wrap" Margin="0,0,0,12"/>
       <Button Content="Back to focus →" Click="BackToFocusClick" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left"/>
@@ -229,7 +223,7 @@
       <WrapPanel><Button Content="Check connection" Click="RefreshClick"/><Button x:Name="RecoveryButton" Content="Release / recover" Click="RecoverClick" IsEnabled="False"/></WrapPanel>
      </StackPanel></Border>
           <Border Style="{StaticResource SectionPanel}" Margin="0,20,0,0"><StackPanel>
-      <TextBlock Text="Extension removed or pairing lost?" FontFamily="Georgia" FontSize="23"/>
+      <TextBlock Text="Extension removed or pairing lost?" FontSize="22" FontWeight="SemiBold"/>
       <TextBlock Text="First reopen the paired browser and use Release / recover. If the extension was removed or its pairing was lost, remove LockIn from that browser profile. After the original deadline, you can record that removal below. This is your confirmation, not automated proof of cleanup." TextWrapping="Wrap" Margin="0,12"/>
       <CheckBox x:Name="RemovalConfirmedBox" Margin="0,8"><TextBlock Text="I removed the LockIn extension from the affected browser profile." TextWrapping="Wrap"/></CheckBox>
       <Button x:Name="RemovalRecoveryButton" Content="Record extension removal" Click="ConfirmRemovalClick" HorizontalAlignment="Left" IsEnabled="False"/>
@@ -244,4 +238,5 @@
    </TabItem>
   </TabControl>
  </DockPanel>
+ </Grid>
 </Window>
