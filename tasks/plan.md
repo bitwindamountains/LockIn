@@ -15,7 +15,7 @@ Source: `SPEC.md`. Tasks are tracked in `tasks/todo.md`. Work happens on branch 
 - [x] Task 1: R20-3 engine: Recover on an Active browser session requests the Guided end
 - [x] Task 2: R20-3 desktop: confirmation text, test harness, DECISIONS
 ### Checkpoint A: .NET suite plus `test-desktop.ps1 -BrowserRecovery` pass
-- [ ] Task 3: R20-2 tolerant history and direct browser-session lookup
+- [x] Task 3: R20-2 tolerant history and direct browser-session lookup
 - [ ] Task 4: R20-6 pipe construction failure is retried
 ### Checkpoint B: .NET suite and desktop browser-recovery run pass
 ### Phase 2: Extension

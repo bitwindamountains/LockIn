@@ -262,7 +262,7 @@ public sealed class SimulationEngine
         BrowserPolicy? policy = session is { State: SessionState.Active or SessionState.Activating }
             ? new(session.Id, session.PolicyHash, session.EndsAtUtc, session.ProfileRevision, session.Policy.Websites, session.Policy.YouTube, session.Policy.StudyResources, session.Policy.DurationSeconds - session.EffectiveElapsedSeconds)
             : null;
-        var released = policy is null ? session ?? _store.ListSessions().FirstOrDefault(s => s.BrowserInstallationId == input.Auth.InstallationId) : null;
+        var released = policy is null ? session ?? _store.GetLatestBrowserSession(input.Auth.InstallationId) : null;
         return new(policy, released?.Id, _clock.UtcNow,
             _browsers.StagedProfile is { } staged ? ProfileRules.Hash(staged) : null,
             _browsers.StagedProfile is { } stagedProfile ? BrowserRequirements.Origins(stagedProfile) : [], released?.PolicyHash);

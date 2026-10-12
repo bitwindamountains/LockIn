@@ -36,7 +36,7 @@ public partial class MainWindow
             s.ProfileName,
             Started = $"{s.StartedAtUtc.ToLocalTime():MMM d, yyyy} · {s.StartedAtUtc.ToLocalTime():t}",
             Elapsed = $"{TimeText(s.ElapsedSeconds)} elapsed",
-            Outcome = $"{s.State} · {s.Scope}",
+            Outcome = s.Damaged ? $"Record could not be verified · {s.Scope}" : $"{s.State} · {s.Scope}",
             Details = $"Original deadline: {s.EndsAtUtc.ToLocalTime():g}" +
                 (s.FinishedAtUtc is { } finished ? $"\nFinished: {finished.ToLocalTime():g}" : "\nNot finalized") +
                 (string.IsNullOrWhiteSpace(s.CompletionReason) ? "" : $"\nReason: {s.CompletionReason}"),

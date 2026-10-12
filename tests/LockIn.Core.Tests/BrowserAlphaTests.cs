@@ -78,6 +78,30 @@ public sealed class BrowserAlphaTests : IDisposable
         Assert.True((await Send("RecoverSession", new { })).Ok);
         Assert.Equal("explicitRecovery", store.GetCurrentSession()!.CompletionReason);
     }
+    [Fact]
+    public async Task DamagedOldRecordIsListedAndDoesNotBreakBrowserRelease()
+    {
+        var auth = await Pair();
+        var session = await Activate(auth);
+        await Send("AcknowledgeBrowserPolicy", new BrowserAckPayload(auth, session.Id, session.PolicyHash));
+        clock.UtcNow = session.EndsAtUtc.AddSeconds(1);
+        await engine.ReconcileAsync();
+        // A newer row for the same browser whose snapshot no longer validates.
+        store.SaveSession(session with { Id = "damaged", PolicyHash = new string('0', 64), State = SessionState.Completed });
+        using (var db = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={Path.Combine(folder, "state.db")};Pooling=False"))
+        {
+            db.Open();
+            using var insert = db.CreateCommand();
+            insert.CommandText = "INSERT INTO sessions(id,state,json) VALUES('unreadable','Completed','{')";
+            insert.ExecuteNonQuery();
+        }
+        var history = Assert.IsAssignableFrom<IReadOnlyList<SessionHistoryItem>>((await Send("ListSessions", new { })).Result);
+        Assert.Equal([("unreadable", true), ("damaged", true), (session.Id, false)], history.Select(h => (h.Id, h.Damaged)));
+        Assert.Equal(("Unknown profile", "Allowed learning"), (history[0].ProfileName, history[1].ProfileName));
+        var poll = Assert.IsType<BrowserPollResult>((await Send("PollBrowser", new BrowserPollPayload(auth, null))).Result);
+        Assert.Equal((session.Id, session.PolicyHash), (poll.ReleaseSessionId, poll.ReleasePolicyHash));
+        Assert.Throws<InvalidDataException>(() => store.GetSession("damaged"));
+    }
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
