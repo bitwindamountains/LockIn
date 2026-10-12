@@ -214,6 +214,13 @@ public sealed class SimulationEngine
     private Session Recover()
     {
         var current = _store.GetCurrentSession() ?? throw new InvalidOperationException("No active session.");
+        // A live browser session is a real restriction, so recovery takes the Guided delay (owner decision R20-3).
+        if (current is { State: SessionState.Active, BrowserInstallationId: not null })
+        {
+            var guided = SessionLogic.RequestGuidedEnd(current, _clock.UtcNow);
+            _store.SaveSession(guided);
+            return guided;
+        }
         var next = current with { State = SessionState.Releasing, CompletionReason = "explicitRecovery" };
         _store.SaveSession(next);
         _cleanupRetryAt = 0;
