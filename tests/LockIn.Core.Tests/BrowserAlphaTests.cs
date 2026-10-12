@@ -98,6 +98,7 @@ public sealed class BrowserAlphaTests : IDisposable
         var history = Assert.IsAssignableFrom<IReadOnlyList<SessionHistoryItem>>((await Send("ListSessions", new { })).Result);
         Assert.Equal([("unreadable", true), ("damaged", true), (session.Id, false)], history.Select(h => (h.Id, h.Damaged)));
         Assert.Equal(("Unknown profile", "Allowed learning"), (history[0].ProfileName, history[1].ProfileName));
+        Assert.Equal([false, true, true], history.Select(h => h.TimesKnown));
         var poll = Assert.IsType<BrowserPollResult>((await Send("PollBrowser", new BrowserPollPayload(auth, null))).Result);
         Assert.Equal((session.Id, session.PolicyHash), (poll.ReleaseSessionId, poll.ReleasePolicyHash));
         Assert.Throws<InvalidDataException>(() => store.GetSession("damaged"));

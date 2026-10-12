@@ -6,6 +6,7 @@
 
 ## Accomplished
 
+- **R21-1 fixed:** a damaged history record whose data can't be read shows "Date unknown" instead of Jan 1, 0001.
 - **R20-5 fixed:** session status checks write the extension's stored cache at most once a second. Clock-rewind detection keeps its 2-second tolerance by also comparing against the latest time the worker saw.
 - **R20-4 fixed:** an unchanged policy no longer rewrites the extension's site rules or re-checks every open tab on each 5-second sync. Rules are compared by shape, as coverage already did, and the tab sweep runs once per session per worker.
 - **R20-6 fixed:** the host no longer exits when it cannot create its pipe endpoint; it logs, keeps reconciling and retries every second. A process test holds the pipe name first and confirms the host serves once it is free.

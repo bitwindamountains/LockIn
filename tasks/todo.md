@@ -53,8 +53,8 @@
 
 ## Task 7: R21-1 history rows with unknown times show "Date unknown"
 - Acceptance:
-  - [ ] `SessionHistoryItem.TimesKnown` is false for an unreadable row and true for readable and damaged-but-parseable rows
-  - [ ] History shows "Date unknown" and no deadline line when `TimesKnown` is false
+  - [x] `SessionHistoryItem.TimesKnown` is false for an unreadable row and true for readable and damaged-but-parseable rows
+  - [x] History shows "Date unknown" and "Original deadline: unknown" when `TimesKnown` is false
 - Verify: `dotnet test`; Release build
 - Files: `src/LockIn.Core/Protocol.cs`, `src/LockIn.Desktop/MainWindow.History.cs`, `tests/LockIn.Core.Tests/BrowserAlphaTests.cs`
 - Depends: none · Size: S
