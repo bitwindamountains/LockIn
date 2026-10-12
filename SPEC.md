@@ -123,7 +123,7 @@ From the review of the R20 branch. Same boundaries, commands and testing strateg
 
 | Id | Finding | Required outcome |
 | --- | --- | --- |
-| R21-1 | A damaged history row whose JSON cannot be read falls back to `DateTimeOffset.MinValue`, so History shows "Jan 1, 0001". | `SessionHistoryItem` exposes whether its times are known. History shows "Date unknown" and omits the deadline line when they are not. |
+| R21-1 | A damaged history row whose JSON cannot be read falls back to `DateTimeOffset.MinValue`, so History shows "Jan 1, 0001". | `SessionHistoryItem` exposes whether its times are known. History shows "Date unknown" and "Original deadline: unknown" when they are not. |
 | R21-2 | Recovering again while a Guided end is already pending still says "Restrictions stay on for 60 seconds". | The 60-second wording appears only when no early end has been requested. |
 | R21-3 | `LocalStore` repeats the same unreadable-snapshot exception filter twice. | One private helper; behaviour unchanged. |
 | R21-4 | `LocalStore.ListSessions()` is used only by tests. The `RecoverSimulation` alias is used by one test. | Remove both and point those tests at `GetSession`, `ListHistory` and `RecoverSession`. This is an owner-approved deletion of unused code; no data is touched. |

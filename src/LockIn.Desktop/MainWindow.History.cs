@@ -34,10 +34,10 @@ public partial class MainWindow
         HistoryList.ItemsSource = rows.Select(s => new
         {
             s.ProfileName,
-            Started = $"{s.StartedAtUtc.ToLocalTime():MMM d, yyyy} · {s.StartedAtUtc.ToLocalTime():t}",
+            Started = s.TimesKnown ? $"{s.StartedAtUtc.ToLocalTime():MMM d, yyyy} · {s.StartedAtUtc.ToLocalTime():t}" : "Date unknown",
             Elapsed = $"{TimeText(s.ElapsedSeconds)} elapsed",
             Outcome = s.Damaged ? $"Record could not be verified · {s.Scope}" : $"{s.State} · {s.Scope}",
-            Details = $"Original deadline: {s.EndsAtUtc.ToLocalTime():g}" +
+            Details = (s.TimesKnown ? $"Original deadline: {s.EndsAtUtc.ToLocalTime():g}" : "Original deadline: unknown") +
                 (s.FinishedAtUtc is { } finished ? $"\nFinished: {finished.ToLocalTime():g}" : "\nNot finalized") +
                 (string.IsNullOrWhiteSpace(s.CompletionReason) ? "" : $"\nReason: {s.CompletionReason}"),
             Cleanup = s.CleanupEvidence switch
