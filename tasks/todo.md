@@ -1,0 +1,52 @@
+# Review 20 tasks
+
+## Task 1: R20-3 engine: Recover on an Active browser session requests the Guided end
+- Acceptance:
+  - [ ] `RecoverSession` on an Active browser session sets `EarlyEndRequestedAtUtc`; the state stays Active; after 60 s the reason is `guidedEnd`
+  - [ ] Simulation Active, plus browser Activating, Releasing and CleanupPending, still release immediately (`explicitRecovery`)
+  - [ ] `NativeLifecycleTests` and `BrowserAlphaTests` are updated to the new contract
+- Verify: `dotnet test LockIn.slnx`
+- Files: `src/LockIn.Service/SimulationEngine.cs`, `tests/LockIn.Core.Tests/ReviewRegressionTests.cs`, `BrowserAlphaTests.cs`, `NativeLifecycleTests.cs`
+- Depends: none · Size: S
+
+## Task 2: R20-3 desktop: confirmation text, test harness, DECISIONS
+- Acceptance:
+  - [ ] The Recover dialog for an Active browser session says it ends in 60 seconds
+  - [ ] `test-desktop.ps1 -BrowserRecovery` passes with the guided release
+  - [ ] The decision is recorded in `DECISIONS.md`
+- Verify: `scripts/test-desktop.ps1 -Configuration Release -BrowserRecovery`
+- Files: `src/LockIn.Desktop/MainWindow.xaml.cs`, `scripts/test-desktop.ps1`, `docs/DECISIONS.md`, `docs/STATUS.md`
+- Depends: 1 · Size: S
+
+## Task 3: R20-2 tolerant history and direct browser-session lookup
+- Acceptance:
+  - [ ] With an invalid old row, `ListSessions` succeeds and marks that row `Damaged`
+  - [ ] Idle `PollBrowser` returns this browser's latest session without reading other rows
+  - [ ] `GetCurrentSession` and `GetSession` still throw on an invalid snapshot
+  - [ ] History shows "record could not be verified" for damaged rows
+- Verify: `dotnet test`; desktop History check in the browser-recovery run
+- Files: `src/LockIn.Core/Protocol.cs`, `src/LockIn.Infrastructure/LocalStore.cs`, `src/LockIn.Service/SimulationEngine.cs`, `src/LockIn.Desktop/MainWindow.History.cs`, `tests/LockIn.Core.Tests/ReviewRegressionTests.cs`
+- Depends: none · Size: M
+
+## Task 4: R20-6 pipe construction failure is retried
+- Acceptance:
+  - [ ] A host started while another server holds its pipe name logs the error, survives, and serves once the name is free
+- Verify: `dotnet test --filter HostProcessTests`
+- Files: `src/LockIn.Service/Program.cs`, `tests/LockIn.Core.Tests/HostProcessTests.cs`
+- Depends: none · Size: S
+
+## Task 5: R20-4 no rule rewrite or tab sweep on unchanged policy
+- Acceptance:
+  - [ ] Repeated syncs with the same policy make 0 `updateDynamicRules` calls after the first apply
+  - [ ] The tab sweep runs once per session per worker
+- Verify: `npm test`, `npm run test:browser`
+- Files: `extension/src/background.ts`, `extension/tests/browser/enforcement.spec.ts`
+- Depends: none · Size: S
+
+## Task 6: R20-5 `current()` storage write throttle
+- Acceptance:
+  - [ ] Calls to `current()` within 1 s cause no `storage.local.set`
+  - [ ] Rewind detection still works (existing cache test)
+- Verify: `npm test`, `npm run test:browser`
+- Files: `extension/src/background.ts`, `extension/tests/browser/enforcement.spec.ts`, `docs/STATUS.md`
+- Depends: 5 · Size: S
