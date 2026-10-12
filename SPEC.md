@@ -116,3 +116,16 @@ Comment only the reason the code can't show. Label simulation versus browser sco
 
 1. The `RecoverSimulation` command alias is used only by one test. Remove it with that test update, or keep it?
 2. R20-6 can't easily be unit-tested at the `Program.cs` top level. Is it acceptable to move the accept loop into a small testable method on the service side? If not, R20-6 ships with a manual verification note only.
+
+## Review 21 follow-ups (2026-10-13)
+
+From the review of the R20 branch. Same boundaries, commands and testing strategy as above.
+
+| Id | Finding | Required outcome |
+| --- | --- | --- |
+| R21-1 | A damaged history row whose JSON cannot be read falls back to `DateTimeOffset.MinValue`, so History shows "Jan 1, 0001". | `SessionHistoryItem` exposes whether its times are known. History shows "Date unknown" and omits the deadline line when they are not. |
+| R21-2 | Recovering again while a Guided end is already pending still says "Restrictions stay on for 60 seconds". | The 60-second wording appears only when no early end has been requested. |
+| R21-3 | `LocalStore` repeats the same unreadable-snapshot exception filter twice. | One private helper; behaviour unchanged. |
+| R21-4 | `LocalStore.ListSessions()` is used only by tests. The `RecoverSimulation` alias is used by one test. | Remove both and point those tests at `GetSession`, `ListHistory` and `RecoverSession`. This is an owner-approved deletion of unused code; no data is touched. |
+
+Deferred: an index on `json_extract(json,'$.browserInstallationId')`. It is a schema change ("ask first") and belongs with retention work (R18-5).
