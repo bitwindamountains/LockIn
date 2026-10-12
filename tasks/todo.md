@@ -11,9 +11,9 @@
 
 ## Task 2: R20-3 desktop: confirmation text, test harness, DECISIONS
 - Acceptance:
-  - [ ] The Recover dialog for an Active browser session says it ends in 60 seconds
-  - [ ] `test-desktop.ps1 -BrowserRecovery` passes with the guided release
-  - [ ] The decision is recorded in `DECISIONS.md`
+  - [x] The Recover dialog for an Active browser session says it ends in 60 seconds
+  - [x] `test-desktop.ps1 -BrowserRecovery` passes with the guided release
+  - [x] The decision is recorded in `DECISIONS.md`
 - Verify: `scripts/test-desktop.ps1 -Configuration Release -BrowserRecovery`
 - Files: `src/LockIn.Desktop/MainWindow.xaml.cs`, `scripts/test-desktop.ps1`, `docs/DECISIONS.md`, `docs/STATUS.md`
 - Depends: 1 · Size: S

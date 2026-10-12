@@ -1,5 +1,7 @@
 # Decisions
 
+- 2026-10-13, review 20: Recovery of an Active browser-alpha session uses the 60-second Guided delay, the same as End early (owner decision R20-3). Recovery stays immediate for simulation sessions and for sessions already activating, releasing or pending cleanup. The simulation Committed-mode recovery tradeoff is unchanged. History shows old session records that fail current validation as damaged; they are never deleted (R20-2).
+
 - 2026-10-01, handoff 19: Successful content decisions alone deduplicate metadata; transient failures retry with a delay capped at 8 seconds while deadline/release remain authoritative. Guard late results after navigation/release. During pending review or asynchronous profile operations, lock conflicting edits/actions and retain the captured baseline/save result for staging/preparation. Back/cancel restore editing. Desktop geometry tests restore only their own windows and reject minimized captures. These close review findings R18-2/R18-3/R18-6; installed and production gates remain separate.
 
 - 2026-10-01, handoff 17: Name unsaved drafts in profile selectors; disclose custom URLs only for custom destinations without clearing their values. Render session review from the validated Start snapshot, separate scope/consequences from exact entries and correctly describe approved-video-only allow lists. Validation reveals optional controls and focuses them after layout. These are presentation changes; preparation/commit and host authority are unchanged.

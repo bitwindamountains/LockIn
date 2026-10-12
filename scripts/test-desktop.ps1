@@ -375,9 +375,11 @@ try {
         Send-Request 'PollBrowser' @{ auth = $auth; readyProfileHash = $null; errorCode = 'permissionMissing' } | Out-Null
         Wait-For { if ((Find-Control 'CoverageText').Current.Name -like '*Site access was removed*') { $true } } | Out-Null
         Write-Output 'PASS: desktop reflects reported coverage and permission loss from a simulated browser actor.'
-        Send-Request 'RecoverSession' | Out-Null
+        $recovering = Send-Request 'RecoverSession'
+        if ($recovering.state -ne 'active' -or -not $recovering.earlyEndRequestedAtUtc) { throw 'Live browser recovery skipped the Guided delay.' }
+        Write-Output 'PASS: recovery of a live browser session waits for the Guided delay.'
         Select-Tab 'HelpTab'
-        Wait-For { if ((Send-Request 'GetSessionStatus').state -eq 'cleanupPending') { $true } } | Out-Null
+        Wait-For { if ((Send-Request 'GetSessionStatus').state -eq 'cleanupPending') { $true } } 75 | Out-Null
         if ([DateTimeOffset]::UtcNow -lt [DateTimeOffset]$session.endsAtUtc -and (Find-Control 'RemovalRecoveryButton').Current.IsEnabled) { throw 'Owner recovery enabled before original deadline.' }
         Wait-For { if ((Find-Control 'RemovalRecoveryButton').Current.IsEnabled) { $true } } 75 | Out-Null
         (Find-Control 'RemovalConfirmedBox').GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern).Toggle()
