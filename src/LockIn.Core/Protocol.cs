@@ -9,4 +9,4 @@ public sealed record CommitPayload(string CandidateId);
 public sealed record SaveProfilePayload(Profile Profile, int ExpectedRevision);
 public sealed record Preparation(string CandidateId, Profile Profile, DateTimeOffset ReadyAtUtc, DateTimeOffset ExpiresAtUtc);
 public sealed record SessionHistoryItem(string Id, string ProfileName, DateTimeOffset StartedAtUtc, DateTimeOffset EndsAtUtc,
-    SessionState State, double ElapsedSeconds, DateTimeOffset? FinishedAtUtc, string? CompletionReason, string Scope = "Simulation", string? CleanupEvidence = null);
+    SessionState State, double ElapsedSeconds, DateTimeOffset? FinishedAtUtc, string? CompletionReason, string Scope = "Simulation", string? CleanupEvidence = null, bool Damaged = false);

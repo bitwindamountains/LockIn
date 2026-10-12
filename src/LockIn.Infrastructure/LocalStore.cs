@@ -133,8 +133,58 @@ public sealed class LocalStore
         return json is null ? null : ReadSession(json);
     }
 
-    public IReadOnlyList<SessionHistoryItem> ListHistory() => ListSessions().Select(s => new SessionHistoryItem(
-        s.Id, s.Policy.Name, s.StartedAtUtc, s.EndsAtUtc, s.State, s.EffectiveElapsedSeconds, s.FinishedAtUtc, s.CompletionReason, s.BrowserInstallationId is null ? "Simulation" : "Browser alpha", s.CleanupEvidence)).ToArray();
+    // History tolerates old snapshots that fail current validation; live-session reads stay strict.
+    public IReadOnlyList<SessionHistoryItem> ListHistory()
+    {
+        using var db = Open();
+        using var command = db.CreateCommand();
+        command.CommandText = "SELECT id, state, json FROM sessions ORDER BY rowid DESC LIMIT 50";
+        using var reader = command.ExecuteReader();
+        var rows = new List<SessionHistoryItem>();
+        while (reader.Read())
+        {
+            var json = reader.GetString(2);
+            try
+            {
+                var s = ReadSession(json);
+                rows.Add(new(s.Id, s.Policy.Name, s.StartedAtUtc, s.EndsAtUtc, s.State, s.EffectiveElapsedSeconds, s.FinishedAtUtc, s.CompletionReason,
+                    s.BrowserInstallationId is null ? "Simulation" : "Browser alpha", s.CleanupEvidence));
+            }
+            catch (Exception error) when (error is InvalidDataException or JsonException or ArgumentException or FormatException)
+            {
+                rows.Add(DamagedHistoryItem(reader.GetString(0), reader.GetString(1), json));
+            }
+        }
+        return rows;
+    }
+
+    private static SessionHistoryItem DamagedHistoryItem(string id, string state, string json)
+    {
+        JsonElement root = default;
+        try { root = JsonSerializer.Deserialize<JsonElement>(json); } catch (JsonException) { }
+        string? Text(JsonElement element, string name) => element.ValueKind == JsonValueKind.Object && element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+        DateTimeOffset Time(string name) => DateTimeOffset.TryParse(Text(root, name), out var value) ? value : DateTimeOffset.MinValue;
+        var policy = root.ValueKind == JsonValueKind.Object && root.TryGetProperty("policy", out var p) ? p : default;
+        return new(id, Text(policy, "name") ?? "Unknown profile", Time("startedAtUtc"), Time("endsAtUtc"),
+            Enum.TryParse<SessionState>(state, out var parsed) ? parsed : SessionState.Recovered, 0, null, Text(root, "completionReason"),
+            Text(root, "browserInstallationId") is null ? "Simulation" : "Browser alpha", Text(root, "cleanupEvidence"), Damaged: true);
+    }
+
+    // Latest readable session for one browser, without validating unrelated rows.
+    public Session? GetLatestBrowserSession(string installationId)
+    {
+        using var db = Open();
+        using var command = db.CreateCommand();
+        command.CommandText = "SELECT json FROM sessions WHERE json_extract(json, '$.browserInstallationId')=$id ORDER BY rowid DESC LIMIT 50";
+        command.Parameters.AddWithValue("$id", installationId);
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            try { return ReadSession(reader.GetString(0)); }
+            catch (Exception error) when (error is InvalidDataException or JsonException or ArgumentException or FormatException) { }
+        }
+        return null;
+    }
 
     public void RecordOwnerReportedRemoval(Session recovered)
     {

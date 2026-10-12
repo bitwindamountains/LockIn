@@ -20,10 +20,10 @@
 
 ## Task 3: R20-2 tolerant history and direct browser-session lookup
 - Acceptance:
-  - [ ] With an invalid old row, `ListSessions` succeeds and marks that row `Damaged`
-  - [ ] Idle `PollBrowser` returns this browser's latest session without reading other rows
-  - [ ] `GetCurrentSession` and `GetSession` still throw on an invalid snapshot
-  - [ ] History shows "record could not be verified" for damaged rows
+  - [x] With an invalid old row, `ListSessions` succeeds and marks that row `Damaged`
+  - [x] Idle `PollBrowser` returns this browser's latest session without reading other rows
+  - [x] `GetCurrentSession` and `GetSession` still throw on an invalid snapshot
+  - [x] History shows "record could not be verified" for damaged rows
 - Verify: `dotnet test`; desktop History check in the browser-recovery run
 - Files: `src/LockIn.Core/Protocol.cs`, `src/LockIn.Infrastructure/LocalStore.cs`, `src/LockIn.Service/SimulationEngine.cs`, `src/LockIn.Desktop/MainWindow.History.cs`, `tests/LockIn.Core.Tests/ReviewRegressionTests.cs`
 - Depends: none · Size: M
