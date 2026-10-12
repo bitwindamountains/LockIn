@@ -150,13 +150,15 @@ public sealed class LocalStore
                 rows.Add(new(s.Id, s.Policy.Name, s.StartedAtUtc, s.EndsAtUtc, s.State, s.EffectiveElapsedSeconds, s.FinishedAtUtc, s.CompletionReason,
                     s.BrowserInstallationId is null ? "Simulation" : "Browser alpha", s.CleanupEvidence));
             }
-            catch (Exception error) when (error is InvalidDataException or JsonException or ArgumentException or FormatException)
+            catch (Exception error) when (Unreadable(error))
             {
                 rows.Add(DamagedHistoryItem(reader.GetString(0), reader.GetString(1), json));
             }
         }
         return rows;
     }
+
+    private static bool Unreadable(Exception error) => error is InvalidDataException or JsonException or ArgumentException or FormatException;
 
     private static SessionHistoryItem DamagedHistoryItem(string id, string state, string json)
     {
@@ -181,7 +183,7 @@ public sealed class LocalStore
         while (reader.Read())
         {
             try { return ReadSession(reader.GetString(0)); }
-            catch (Exception error) when (error is InvalidDataException or JsonException or ArgumentException or FormatException) { }
+            catch (Exception error) when (Unreadable(error)) { }
         }
         return null;
     }
