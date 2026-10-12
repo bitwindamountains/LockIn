@@ -47,7 +47,7 @@ public class SimulationEngineTests
             await reopened.ReconcileAsync();
             Assert.Null(store.GetCurrentSession());
             Assert.Equal(1, provider.Released);
-            Assert.Equal(SessionState.Completed, store.ListSessions()[0].State);
+            Assert.Equal(SessionState.Completed, store.ListHistory()[0].State);
         }
         finally { if (Directory.Exists(folder)) Directory.Delete(folder, true); }
     }
@@ -67,7 +67,7 @@ public class SimulationEngineTests
             await new SimulationEngine(store, clock, provider).ReconcileAsync();
             Assert.Equal(0, provider.Applied);
             Assert.Equal(1, provider.Released);
-            Assert.Equal(SessionState.Recovered, store.ListSessions()[0].State);
+            Assert.Equal(SessionState.Recovered, store.ListHistory()[0].State);
         }
         finally { if (Directory.Exists(folder)) Directory.Delete(folder, true); }
     }

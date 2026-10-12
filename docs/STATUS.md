@@ -6,6 +6,7 @@
 
 ## Accomplished
 
+- **R21-3/R21-4 done:** one shared unreadable-snapshot filter in `LocalStore`. The unused `ListSessions()` and the `RecoverSimulation` alias were removed with owner approval; tests use `ListHistory` and `RecoverSession`. The native-bridge process test now tolerates a transient unavailable host while it waits for release, as the extension does.
 - **R21-2 fixed:** the recover prompt promises the 60-second delay only when no early end is already pending. The desktop browser-recovery run now reads both prompts. The harness retries a busy pipe connection and reports which wait timed out.
 - **R21-1 fixed:** a damaged history record whose data can't be read shows "Date unknown" instead of Jan 1, 0001.
 - **R20-5 fixed:** session status checks write the extension's stored cache at most once a second. Clock-rewind detection keeps its 2-second tolerance by also comparing against the latest time the worker saw.
@@ -25,18 +26,18 @@ See the [progress report and evidence](progress/2026-10-01-19-review-fixes.md). 
 | Check | Result |
 | --- | --- |
 | Release build | Passed, zero warnings/errors |
-| .NET suite | 52 passed |
+| .NET suite | 52 passed (3 consecutive runs) |
 | Extension typecheck/build | Passed |
 | Policy/content-script tests | 15 passed: 7 policy plus 8 fault/lifecycle cases |
 | Chromium enforcement/recovery/motion and presentation | 13 passed (website case includes a trailing-dot host; new unchanged-policy sync and status-throttle cases) |
 | Expanded desktop design | Passed: deliberate window restoration, review action guards, browser staging guard, compact layouts and validation focus |
 | Desktop editor | Passed |
 | Desktop full session/history | Passed |
-| Desktop browser recovery | Passed using a simulated browser actor, including the Guided delay for live browser recovery |
+| Desktop browser recovery | Intermittent: passed 3 of the last 5 runs; failures were host pipe timeouts at unchanged steps (see below) |
 
 Four newly added fault cases failed before the retry fix. Final content-script tests cover error/rejected/malformed responses, backoff, deadline cleanup and late results after release/navigation. Browser fixtures are separate from installed Brave and live YouTube acceptance. The final small stale-error guard was verified by typecheck/build and the expanded content-script suite after the browser run.
 
-Observed 2026-10-13: the desktop browser-recovery harness failed intermittently, in 4 of 9 runs, at steps this change did not touch: an early UI wait, a pipe connect and an 8-second pipe read. The two final runs passed. The read timeout means the host once took more than 8 s to answer, so investigate host or SQLite latency before relying on the harness in CI.
+Observed 2026-10-13 (open): the desktop browser-recovery harness failed intermittently, in 4 of 9 runs, at steps this change did not touch: an early UI wait, a pipe connect and an 8-second pipe read. The two final runs passed. The read timeout means the host once took more than 8 s to answer, so investigate host or SQLite latency before relying on the harness in CI. The checkpoint D run failed the same way; the host log showed `Incomplete pipe request timed out.`. Leading hypothesis: `ServiceClient.SendAsync` awaits without `ConfigureAwait(false)`, so the desktop's request write waits on a busy WPF UI thread while holding the host's only pipe instance. This could also starve the browser bridge. Not yet proven.
 
 ## Owner handoff
 
