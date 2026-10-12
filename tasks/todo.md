@@ -69,7 +69,7 @@
 
 ## Task 9: R21-3 single unreadable-snapshot filter in LocalStore
 - Acceptance:
-  - [ ] One helper is used by `ListHistory` and `GetLatestBrowserSession`; existing tests stay green
+  - [x] One helper is used by `ListHistory` and `GetLatestBrowserSession`; existing tests stay green
 - Verify: `dotnet test`
 - Files: `src/LockIn.Infrastructure/LocalStore.cs`
 - Depends: 7 · Size: XS
