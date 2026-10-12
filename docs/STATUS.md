@@ -1,11 +1,12 @@
 # LockIn progress report
 
 **Updated:** 2026-10-13, review 20  
-**Stage:** Review 20 findings R20-1 to R20-6 fixed; regression checks passed.  
+**Stage:** Review 20 and 21 findings (R20-1 to R21-5) fixed; regression checks passed.  
 **Release:** Developer alpha. **Not production ready.**
 
 ## Accomplished
 
+- **R21-5 fixed:** pipe client I/O no longer resumes on the caller's thread. From the desktop, a request used to continue on the WPF UI thread while holding the host's only pipe instance, so a busy UI could stall every client, browser bridge included, for up to 4 s. A test with a stalled synchronization context failed before the fix.
 - **R21-3/R21-4 done:** one shared unreadable-snapshot filter in `LocalStore`. The unused `ListSessions()` and the `RecoverSimulation` alias were removed with owner approval; tests use `ListHistory` and `RecoverSession`. The native-bridge process test now tolerates a transient unavailable host while it waits for release, as the extension does.
 - **R21-2 fixed:** the recover prompt promises the 60-second delay only when no early end is already pending. The desktop browser-recovery run now reads both prompts. The harness retries a busy pipe connection and reports which wait timed out.
 - **R21-1 fixed:** a damaged history record whose data can't be read shows "Date unknown" instead of Jan 1, 0001.
@@ -26,18 +27,18 @@ See the [progress report and evidence](progress/2026-10-01-19-review-fixes.md). 
 | Check | Result |
 | --- | --- |
 | Release build | Passed, zero warnings/errors |
-| .NET suite | 52 passed (3 consecutive runs) |
+| .NET suite | 53 passed |
 | Extension typecheck/build | Passed |
 | Policy/content-script tests | 15 passed: 7 policy plus 8 fault/lifecycle cases |
 | Chromium enforcement/recovery/motion and presentation | 13 passed (website case includes a trailing-dot host; new unchanged-policy sync and status-throttle cases) |
 | Expanded desktop design | Passed: deliberate window restoration, review action guards, browser staging guard, compact layouts and validation focus |
 | Desktop editor | Passed |
-| Desktop full session/history | Passed |
-| Desktop browser recovery | Intermittent: passed 3 of the last 5 runs; failures were host pipe timeouts at unchanged steps (see below) |
+| Desktop full session/history | Passed (2026-10-13) |
+| Desktop browser recovery | Passed 3 consecutive runs, including the Guided delay and both recover prompts |
 
 Four newly added fault cases failed before the retry fix. Final content-script tests cover error/rejected/malformed responses, backoff, deadline cleanup and late results after release/navigation. Browser fixtures are separate from installed Brave and live YouTube acceptance. The final small stale-error guard was verified by typecheck/build and the expanded content-script suite after the browser run.
 
-Observed 2026-10-13 (open): the desktop browser-recovery harness failed intermittently, in 4 of 9 runs, at steps this change did not touch: an early UI wait, a pipe connect and an 8-second pipe read. The two final runs passed. The read timeout means the host once took more than 8 s to answer, so investigate host or SQLite latency before relying on the harness in CI. The checkpoint D run failed the same way; the host log showed `Incomplete pipe request timed out.`. Leading hypothesis: `ServiceClient.SendAsync` awaits without `ConfigureAwait(false)`, so the desktop's request write waits on a busy WPF UI thread while holding the host's only pipe instance. This could also starve the browser bridge. Not yet proven.
+Resolved 2026-10-13: the intermittent desktop-harness host timeouts had two causes. Memory pressure on the development machine made the earlier failures much likelier; with about 2.5 GB free, 3 of 3 runs passed with no stalls. The other cause was the client-side UI-thread stall fixed in R21-5. After the fix, 3 of 3 browser-recovery runs and the full session/history run passed, with no `Incomplete pipe request` entries in the host log.
 
 ## Owner handoff
 

@@ -81,3 +81,11 @@
 - Verify: `dotnet test`
 - Files: `src/LockIn.Infrastructure/LocalStore.cs`, `src/LockIn.Service/SimulationEngine.cs`, `tests/LockIn.Core.Tests/SimulationEngineTests.cs`, `tests/LockIn.Core.Tests/ReviewRegressionTests.cs`
 - Depends: 9 · Size: S
+
+## Task 11: R21-5 pipe client I/O does not depend on the caller's synchronization context
+- Acceptance:
+  - [x] `ServiceClient.SendAsync` called under a synchronization context that never runs callbacks completes against a pipe server
+  - [x] The desktop browser-recovery run passes repeatedly, with no `Incomplete pipe request timed out.` in the host log
+- Verify: `dotnet test`; `scripts/test-desktop.ps1 -Configuration Release -BrowserRecovery` x3
+- Files: `src/LockIn.Core/PipeTransport.cs`, `tests/LockIn.Core.Tests/ServiceClientTests.cs`, `docs/STATUS.md`
+- Depends: none · Size: S
