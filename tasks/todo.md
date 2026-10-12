@@ -37,8 +37,8 @@
 
 ## Task 5: R20-4 no rule rewrite or tab sweep on unchanged policy
 - Acceptance:
-  - [ ] Repeated syncs with the same policy make 0 `updateDynamicRules` calls after the first apply
-  - [ ] The tab sweep runs once per session per worker
+  - [x] Repeated syncs with the same policy make 0 `updateDynamicRules` calls after the first apply
+  - [x] The tab sweep runs once per session per worker
 - Verify: `npm test`, `npm run test:browser`
 - Files: `extension/src/background.ts`, `extension/tests/browser/enforcement.spec.ts`
 - Depends: none · Size: S

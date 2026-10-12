@@ -19,7 +19,7 @@ Source: `SPEC.md`. Tasks are tracked in `tasks/todo.md`. Work happens on branch 
 - [x] Task 4: R20-6 pipe construction failure is retried
 ### Checkpoint B: .NET suite and desktop browser-recovery run pass
 ### Phase 2: Extension
-- [ ] Task 5: R20-4 no rule rewrite or tab sweep on unchanged policy
+- [x] Task 5: R20-4 no rule rewrite or tab sweep on unchanged policy
 - [ ] Task 6: R20-5 `current()` storage write throttle
 ### Checkpoint C: all suites pass; STATUS.md final
 
