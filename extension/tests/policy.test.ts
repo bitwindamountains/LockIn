@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { matchVideo, compileSites, blockedHost, cacheValid, parseVideoId } from '../src/shared/policy.ts';
+import { matchVideo, compileSites, blockedHost, cacheValid, parseVideoId, withoutTrailingDot } from '../src/shared/policy.ts';
 import type { Policy, YouTubeSettings } from '../src/shared/policy.ts';
 
 const settings: YouTubeSettings = { rules: [{ id: '1', source: 'visibleHashtags', value: 'education' }], approvedVideoIds: [], matchingMode: 'allowMatchingTags', tabAction: 'replaceCurrent', destinationKind: 'focusPage' };
@@ -20,6 +20,17 @@ test('website compiler matches host boundaries and only top-level pages', () => 
   for (const url of ['https://example.com/', 'https://a.example.com:443/path']) { assert.ok(regex.test(url)); assert.ok(blockedHost(url, rules)); }
   for (const url of ['https://notexample.com/', 'https://example.com.evil.test/', 'https://other.test/example.com/']) { assert.ok(!regex.test(url)); assert.ok(!blockedHost(url, rules)); }
   assert.deepEqual(compiled.condition.resourceTypes, ['main_frame']);
+});
+test('a trailing-dot hostname cannot bypass website rules', () => {
+  const rules = [{ id: 'site', host: 'example.com', includeSubdomains: true }];
+  const regex = new RegExp(compileSites(rules)[0].condition.regexFilter);
+  for (const url of ['https://example.com./', 'https://www.example.com.:443/path']) { assert.ok(regex.test(url), url); assert.ok(blockedHost(url, rules), url); }
+  assert.ok(!regex.test('https://example.com.evil.test/'));
+});
+test('trailing-dot URLs map to their canonical host', () => {
+  assert.equal(withoutTrailingDot('https://www.youtube.com./watch?v=abcdefghijk'), 'https://www.youtube.com/watch?v=abcdefghijk');
+  assert.equal(withoutTrailingDot('https://www.youtube.com/watch?v=abcdefghijk'), null);
+  assert.equal(withoutTrailingDot('chrome://extensions./'), null);
 });
 test('cache expires independently and detects clock rewind', () => {
   const now = Date.now();

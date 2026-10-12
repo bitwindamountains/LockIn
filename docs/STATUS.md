@@ -1,11 +1,12 @@
 # LockIn progress report
 
-**Updated:** 2026-10-01, handoff 19  
+**Updated:** 2026-10-13, review 20  
 **Stage:** Review defects fixed and regression checks passed.  
 **Release:** Developer alpha. **Not production ready.**
 
 ## Accomplished
 
+- **R20-1 fixed:** a trailing-dot hostname (`example.com.`, `www.youtube.com.`) no longer bypasses website rules or the YouTube filter. Website rules and `blockedHost` accept the trailing dot; during a session, other trailing-dot pages are reloaded at their canonical host so YouTube content rules apply. Unit and Chromium regressions failed before the fix.
 - **R18-2 fixed:** failed YouTube evaluations retry with unchanged metadata and visible feedback; delay grows from 1 to at most 8 seconds. Successful decisions remain deduplicated. Late replies/errors cannot undo release or affect a newly navigated video.
 - **R18-3 fixed:** pending review and asynchronous profile operations lock conflicting edits/actions. Save, staging and preparation use a captured profile/revision. Back and countdown cancellation restore editing.
 - **R18-6 verified:** the desktop harness restores only its test window and rejects invalid/minimized captures. Deliberate minimization and the entire expanded design check pass.
@@ -19,8 +20,8 @@ See the [progress report and evidence](progress/2026-10-01-19-review-fixes.md). 
 | Release build | Passed, zero warnings/errors |
 | .NET suite | 49 passed |
 | Extension typecheck/build | Passed |
-| Policy/content-script tests | 13 passed: 5 policy plus 8 fault/lifecycle cases |
-| Chromium enforcement/recovery/motion and presentation | 11 passed |
+| Policy/content-script tests | 15 passed: 7 policy plus 8 fault/lifecycle cases |
+| Chromium enforcement/recovery/motion and presentation | 11 passed (website case now includes a trailing-dot host) |
 | Expanded desktop design | Passed: deliberate window restoration, review action guards, browser staging guard, compact layouts and validation focus |
 | Desktop editor | Passed |
 | Desktop full session/history | Passed |

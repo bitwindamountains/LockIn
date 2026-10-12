@@ -1,4 +1,4 @@
-import { blockedHost, cacheValid, compileSites, matchVideo, originsFor, ownedRule, parseVideoId, safeOrigins, validPolicy } from './shared/policy';
+import { blockedHost, cacheValid, compileSites, matchVideo, originsFor, ownedRule, parseVideoId, safeOrigins, validPolicy, withoutTrailingDot } from './shared/policy';
 import type { Cache, Policy } from './shared/policy';
 
 type Auth = { installationId: string; credential: string };
@@ -239,7 +239,10 @@ chrome.tabs.onUpdated.addListener((id, change, tab) => {
   redirected.delete(id);
   void enqueue(async () => {
     const cache = await current();
-    if (cache && tab.url && blockedHost(tab.url, cache.policy.websites)) await chrome.tabs.update(id, { url: chrome.runtime.getURL('blocked.html') });
+    if (!cache || !tab.url) return;
+    const canonical = withoutTrailingDot(tab.url);
+    if (blockedHost(tab.url, cache.policy.websites)) await chrome.tabs.update(id, { url: chrome.runtime.getURL('blocked.html') });
+    else if (canonical) await chrome.tabs.update(id, { url: canonical });
   }).catch(() => { coverageIssue = 'applyFailed'; });
 });
 void chrome.alarms.create('lockin-sync', { periodInMinutes: 0.5 });
