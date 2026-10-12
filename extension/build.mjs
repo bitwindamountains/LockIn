@@ -9,3 +9,4 @@ await cp('src/popup.html', 'dist/popup.html');
 await cp('src/popup.css', 'dist/popup.css');
 await cp('src/blocked.html', 'dist/blocked.html');
 await cp('src/focus.html', 'dist/focus.html');
+await cp('src/fonts', 'dist/fonts', { recursive: true });

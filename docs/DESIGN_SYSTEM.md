@@ -2,28 +2,25 @@
 
 ## Identity
 
-A lamplit study desk at night. Warm paper and forest ink carry reading and forms. The session itself is a night-desk scene: one desk lamp, an open notebook, a pencil and a mug. The lamp is the session's character. It rests switched off and lifted when idle, leans in and lights the notebook during a session, and shows an amber-red bulb when cleanup needs attention. The blocked page tells one short story: the distracting site, drawn as a small browser-window letter, is tucked into an envelope and sealed "later". Objects echo state that text already states; they never replace it. Use flat sections for forms/help and rows for history; no stat cards, stock photography or remote images.
+Eclipse: a night sky where the session is a solar eclipse. The moon blocks the sun the way a session blocks distractions. Idle shows a partial eclipse (a crescent of sun); an active session slides the moon to totality, the corona blooms and a "diamond ring" glints once; attention needs (cleanup pending, status unavailable) let the moon slip and turn the corona red. The clock sits on the moon. Surfaces are frosted glass over a violet, ember and blue aurora with stars and film grain. One accent only: an ember gradient (gold to coral) for primary actions, focus and the corona. Objects echo state that text already states; they never replace it. No stock photography, remote images, gradient text or meta-labels.
 
 ## Foundations
 
 | Role | Value / rule |
 | --- | --- |
-| Body | Segoe UI/system sans, 14px native / 15px web |
-| Page title | Georgia, 28px native/popup; 30–36px destination pages |
-| Section | 16–20px, semibold |
-| Supporting text | 12–13px; never shrink important copy to make it fit |
-| Spacing | 4px base: 4, 8, 12, 16, 24, 32 |
-| Paper / ink | Web #F7F4EA, native #F7F7F0 / #1F3A2B web, #20392C native |
-| Night scene | #1B3125 to #12221A gradient; text #F4EFE0, supporting #B9C7B2 |
-| Lamp accent | #F2B84B amber, #F7D58A glow (active timer and lamp light only); alarm bulb #E07A5F |
-| Secondary / primary action | #586657 / #254B36 |
-| Session tint / divider | #E5EDCE / #D4D9CD |
-| Error / keyboard focus | #A02B20 / #175ACA |
-| Radius | 6px web controls, 8px native controls/panels |
+| Type | Geist (UI, headings) and Geist Mono (clock, scope labels, URLs), bundled under the SIL OFL; never fetched remotely |
+| Display | Web page titles clamp(40px, 6.4vw, 92px), tracking -0.05em, two lines at most; native page titles 32px (26px compact) |
+| Body / supporting | 15px web, 14px native / 12-13px; never shrink important copy to make it fit |
+| Canvas | #07080D with aurora washes: violet #7B6CFF, ember #FF7A45, blue #40AAFF at low alpha; stars and grain on the web |
+| Text | #F2EFEA primary, #AAA6B6 secondary, #8E8A9C tertiary |
+| Glass | Cards 6-8% white over the canvas, 1px edge at 9-16% white, radius 20-22px (cards), 12px (fields), pill buttons |
+| Accent | Ember gradient #FFC86B to #FF7A45; button text #170B04; focus ring #FFC86B |
+| Status | Warning #FFB27A, error #FF8A80, active clock #FFE9C4 |
+| Spacing | 4px base: 4, 8, 12, 16, 24, 32; destination pages use large section breaks (72-150px) |
 | Targets | Buttons/inputs/disclosures at least 44px tall; checkbox label is the target |
-| Motion | Navigation/disclosure 180ms; page sections rise 10px with a 70ms stagger; lamp tilt 0.9-1.1s spring and a one-time switch-on flicker; mug steam loops only during an active session; letter story 1.3s once. Clock digits never animate. |
+| Motion | Sections rise 14px with blur and a 70-80ms stagger; the moon slides 1.9s (ease-in-out); diamond-ring glint once; corona breathes 7s and rays turn slowly only while active; sky drift and star twinkle are ambient. Clock digits never animate. |
 
-Scene markup lives in `extension/src/scene.ts` (inline SVG, decorative, `aria-hidden`) and in the session ticket of `MainWindow.xaml` (`LampScene`). Native primitives live in `Resources/QuietStudy.xaml`: SurfaceCard, SectionPanel, SupportingText, Error, PrimaryButton, SecondaryButton, FocusRing and the Expander template. Browser surfaces share tokenized `popup.css`. Browser coverage wording is centralized in `shared/presentation.ts`.
+Scene markup lives in `extension/src/scene.ts` (inline SVG, decorative, `aria-hidden`) and in the session ticket of `MainWindow.xaml` (`EclipseScene`). Native styles live in `Resources/QuietStudy.xaml` (resource keys kept for compatibility). Browser surfaces share `popup.css`. Browser coverage wording is centralized in `shared/presentation.ts`.
 
 ## Composition and behavior
 
@@ -41,8 +38,8 @@ Pending session review and asynchronous profile operations disable conflicting e
 
 Show busy labels for asynchronous actions and disable repeated submissions. Preserve focused resource nodes during polling; move focus to a visible heading when a completed setup/access section disappears. Empty, unavailable and recovery states have explicit text, not color alone. Do not declare cleanup complete merely because no policy is cached.
 
-Respect Windows reduced motion and web `prefers-reduced-motion`; local preferences can reduce motion further. With motion reduced, every object shows its resting state for the current session state (lamp on or off, envelope sealed) and nothing loops. Resting styles are the final state; keyframes animate only from it. Host authority, permissions, immutable session rules and release logic never depend on animation.
+Respect Windows reduced motion and web `prefers-reduced-motion`; local preferences can reduce motion further. With motion reduced, the eclipse shows its resting position for the current state (partial, total or slipping) and nothing loops. Resting styles are the final state; keyframes animate only from it. Host authority, permissions, immutable session rules and release logic never depend on animation.
 
-Measured static contrast pairs, night scene at its lighter end (#1B3125): text 12.08:1, amber timer 9.81:1, supporting 7.85:1. On #12221A: alert 9.69:1, amber focus ring 9.24:1. Web paper: body 11.24:1, secondary 5.53:1, link-card arrow hover 5.54:1. Earlier pairs: body/paper 11.60:1; secondary/paper 5.65:1; secondary/session tint 5.02:1; primary button 9.82:1; navigation 9.31:1; error/paper 6.82:1; input border/white 3.34:1. These checks do not constitute a complete accessibility certification.
+Measured static contrast pairs: primary text 17.45:1 on the canvas and 14.74:1 on the lightest aurora; secondary 7.11:1 or better; tertiary 5.34:1 on glass; warning 9.58:1; error 7.83:1 on glass; focus ring 11.69:1 on glass; button text 7.48:1 on the coral end of the ember gradient. These checks do not constitute a complete accessibility certification.
 
 Desktop minimum is 620×540; there is no native mobile app. Verify web surfaces at 320, 375, 768, 1024, 1280 and 1440px. Physical scaling, high contrast and screen-reader acceptance require further testing.
