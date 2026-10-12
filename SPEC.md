@@ -127,5 +127,6 @@ From the review of the R20 branch. Same boundaries, commands and testing strateg
 | R21-2 | Recovering again while a Guided end is already pending still says "Restrictions stay on for 60 seconds". | The 60-second wording appears only when no early end has been requested. |
 | R21-3 | `LocalStore` repeats the same unreadable-snapshot exception filter twice. | One private helper; behaviour unchanged. |
 | R21-4 | `LocalStore.ListSessions()` is used only by tests. The `RecoverSimulation` alias is used by one test. | Remove both and point those tests at `GetSession`, `ListHistory` and `RecoverSession`. This is an owner-approved deletion of unused code; no data is touched. |
+| R21-5 | `ServiceClient`/`PipeTransport` await without `ConfigureAwait(false)`. From the WPF desktop, request I/O continues on the UI thread while holding the host's only pipe instance, so a busy UI thread can stall every client for up to 4 s. | A request sent from a thread whose synchronization context never runs callbacks still completes. |
 
 Deferred: an index on `json_extract(json,'$.browserInstallationId')`. It is a schema change ("ask first") and belongs with retention work (R18-5).

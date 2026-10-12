@@ -27,6 +27,7 @@ Source: `SPEC.md`. Tasks are tracked in `tasks/todo.md`. Work happens on branch 
 - [x] Task 8: R21-2 recover prompt only promises 60 s when no early end is pending
 - [x] Task 9: R21-3 single unreadable-snapshot filter in LocalStore
 - [x] Task 10: R21-4 remove `ListSessions()` and the `RecoverSimulation` alias
+- [x] Task 11: R21-5 pipe client I/O does not depend on the caller's synchronization context
 ### Checkpoint D: .NET suite, extension suites and desktop browser-recovery run pass; STATUS.md updated
 
 ## Risks and Mitigations
