@@ -11,7 +11,7 @@ public sealed class BrowserAlphaTests : IDisposable
     private readonly Clock clock = new();
     private readonly LocalStore store;
     private SimulationEngine engine;
-    private static Profile Profile => new("allow", 1, "Allowed learning", 60, CommitmentMode.Guided, [], [],
+    private static Profile Profile => new("allow", 1, "Allowed learning", 120, CommitmentMode.Guided, [], [],
         new([new("tag", "visibleHashtags", "education")], [], DestinationKind: "focusPage", MatchingMode: "allowMatchingTags"), []);
     public BrowserAlphaTests()
     {
@@ -55,6 +55,28 @@ public sealed class BrowserAlphaTests : IDisposable
         await engine.ReconcileAsync();
         Assert.Null(store.GetCurrentSession());
         Assert.Equal(SessionState.Completed, store.GetSession(session.Id)!.State);
+    }
+    [Fact]
+    public async Task RecoverOnActiveBrowserSessionUsesGuidedDelay()
+    {
+        var auth = await Pair();
+        var session = await Activate(auth);
+        await Send("AcknowledgeBrowserPolicy", new BrowserAckPayload(auth, session.Id, session.PolicyHash));
+        Assert.True((await Send("RecoverSession", new { })).Ok);
+        var pending = store.GetCurrentSession()!;
+        Assert.Equal(SessionState.Active, pending.State);
+        Assert.NotNull(pending.EarlyEndRequestedAtUtc);
+        Assert.NotNull(Assert.IsType<BrowserPollResult>((await Send("PollBrowser", new BrowserPollPayload(auth, null))).Result).Policy);
+        clock.UtcNow = clock.UtcNow.AddSeconds(59);
+        await engine.ReconcileAsync();
+        Assert.Equal(SessionState.Active, store.GetCurrentSession()!.State);
+        clock.UtcNow = clock.UtcNow.AddSeconds(1);
+        await engine.ReconcileAsync();
+        var releasing = store.GetCurrentSession()!;
+        Assert.Equal((SessionState.CleanupPending, "guidedEnd"), (releasing.State, releasing.CompletionReason));
+        // Once release has begun, recovery stays immediate.
+        Assert.True((await Send("RecoverSession", new { })).Ok);
+        Assert.Equal("explicitRecovery", store.GetCurrentSession()!.CompletionReason);
     }
     [Theory]
     [InlineData(false)]

@@ -86,14 +86,19 @@ public class NativeLifecycleTests
             Assert.Equal(session.EndsAtUtc, resumed.EndsAtUtc);
             Assert.NotNull((await Browser<BrowserPollResult>("PollBrowser", new BrowserPollPayload(auth, null))).Policy);
             Assert.False((await Native("RecoverSession", new { })).Ok);
-            await Desktop<Session>("RecoverSession", new { });
-            var release = await Browser<BrowserPollResult>("PollBrowser", new BrowserPollPayload(auth, null));
+            // A live browser session recovers through the Guided delay; the policy stays until release.
+            Assert.NotNull((await Desktop<Session>("RecoverSession", new { })).EarlyEndRequestedAtUtc);
+            Assert.NotNull((await Browser<BrowserPollResult>("PollBrowser", new BrowserPollPayload(auth, null))).Policy);
+            BrowserPollResult release;
+            var waitUntil = DateTime.UtcNow.AddSeconds(75);
+            while ((release = await Browser<BrowserPollResult>("PollBrowser", new BrowserPollPayload(auth, null))).Policy is not null && DateTime.UtcNow < waitUntil)
+                await Task.Delay(1000);
             Assert.Null(release.Policy);
             Assert.Equal(session.Id, release.ReleaseSessionId);
             Assert.Equal(session.PolicyHash, release.ReleasePolicyHash);
             await Browser<JsonElement>("AcknowledgeBrowserPolicy", new BrowserAckPayload(auth, session.Id, session.PolicyHash, true));
             var history = await Desktop<SessionHistoryItem[]>("ListSessions", new { });
-            Assert.Equal(SessionState.Recovered, Assert.Single(history).State);
+            Assert.Equal(SessionState.Completed, Assert.Single(history).State);
             Assert.Equal("browserAcknowledged", history[0].CleanupEvidence);
             bridge.StandardInput.Close();
             await bridge.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(10));

@@ -2,9 +2,9 @@
 
 ## Task 1: R20-3 engine: Recover on an Active browser session requests the Guided end
 - Acceptance:
-  - [ ] `RecoverSession` on an Active browser session sets `EarlyEndRequestedAtUtc`; the state stays Active; after 60 s the reason is `guidedEnd`
-  - [ ] Simulation Active, plus browser Activating, Releasing and CleanupPending, still release immediately (`explicitRecovery`)
-  - [ ] `NativeLifecycleTests` and `BrowserAlphaTests` are updated to the new contract
+  - [x] `RecoverSession` on an Active browser session sets `EarlyEndRequestedAtUtc`; the state stays Active; after 60 s the reason is `guidedEnd`
+  - [x] Simulation Active, plus browser Activating, Releasing and CleanupPending, still release immediately (`explicitRecovery`)
+  - [x] `NativeLifecycleTests` and `BrowserAlphaTests` are updated to the new contract
 - Verify: `dotnet test LockIn.slnx`
 - Files: `src/LockIn.Service/SimulationEngine.cs`, `tests/LockIn.Core.Tests/ReviewRegressionTests.cs`, `BrowserAlphaTests.cs`, `NativeLifecycleTests.cs`
 - Depends: none · Size: S
