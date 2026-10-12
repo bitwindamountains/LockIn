@@ -6,6 +6,7 @@
 
 ## Accomplished
 
+- **R20-3 fixed:** Recover on an Active browser session now requests the 60-second Guided end, and the desktop prompt says so. It stays immediate for simulation and for sessions already releasing or pending cleanup. The engine test and desktop browser-recovery run cover it.
 - **R20-1 fixed:** a trailing-dot hostname (`example.com.`, `www.youtube.com.`) no longer bypasses website rules or the YouTube filter. Website rules and `blockedHost` accept the trailing dot; during a session, other trailing-dot pages are reloaded at their canonical host so YouTube content rules apply. Unit and Chromium regressions failed before the fix.
 - **R18-2 fixed:** failed YouTube evaluations retry with unchanged metadata and visible feedback; delay grows from 1 to at most 8 seconds. Successful decisions remain deduplicated. Late replies/errors cannot undo release or affect a newly navigated video.
 - **R18-3 fixed:** pending review and asynchronous profile operations lock conflicting edits/actions. Save, staging and preparation use a captured profile/revision. Back and countdown cancellation restore editing.
