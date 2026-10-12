@@ -2,7 +2,7 @@
 
 LockIn is a local Windows study-focus app in development. The current build provides a tested simulation workflow and an **M3/M4 browser alpha** with selected website redirects and exact YouTube allow-tag filtering. Desktop app closure is unavailable. This is not production ready. Browser setup is explicit; ordinary builds do not install restrictions.
 
-Browser coverage and owner-reported recovery have been built and tested. Installed Brave pairing passed in isolated profiles in handoff 14. Handoffs 16–17 redesign the main frontend screens and improve first use, optional settings and session review, with verified session/editor/recovery journeys. Installed browser permission/activation/release and live YouTube acceptance remain pending. Handoff 19 fixes the two review defects with regression tests and completes the expanded desktop design check. See the [progress report](docs/progress/2026-10-01-19-review-fixes.md).
+Browser coverage and owner-reported recovery have been built and tested. Installed Brave pairing passed in isolated profiles in handoff 14. Handoffs 16–17 redesign the main frontend screens and improve first use, optional settings and session review, with verified session/editor/recovery journeys. Installed browser permission/activation/release and live YouTube acceptance remain pending. Handoff 20 fixes review findings R20-1 to R21-5 and replaces the frontend with the Eclipse design (bundled Geist fonts, glass surfaces, an eclipse that reflects session state). See the [progress report](docs/progress/2026-10-13-20-review-fixes-and-eclipse.md).
 
 The specification is [`lockin_full_scale_build_plan (1).md`](lockin_full_scale_build_plan%20(1).md). Progress and pending acceptance cases are in [`docs/STATUS.md`](docs/STATUS.md).
 
