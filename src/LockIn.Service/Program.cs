@@ -46,8 +46,20 @@ var reconciliation = Task.Run(async () =>
 });
 while (!cancellation.IsCancellationRequested)
 {
-    await using var pipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1,
-        PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+    NamedPipeServerStream pipe;
+    try
+    {
+        pipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1,
+            PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+    }
+    catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+    {
+        // Keep reconciling sessions while the endpoint is unavailable; retry instead of exiting.
+        Console.Error.WriteLine($"Pipe endpoint unavailable: {error.Message}");
+        try { await Task.Delay(1000, cancellation.Token); } catch (OperationCanceledException) { break; }
+        continue;
+    }
+    await using var ownedPipe = pipe;
     try
     {
         await pipe.WaitForConnectionAsync(cancellation.Token);

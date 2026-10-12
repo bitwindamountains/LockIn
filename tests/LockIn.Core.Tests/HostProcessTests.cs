@@ -52,6 +52,37 @@ public class HostProcessTests
         }
     }
 
+    [WindowsFact]
+    [Trait("Category", "WindowsIntegration")]
+    public async Task HostSurvivesPipeCreationFailureAndServesOnceTheNameIsFree()
+    {
+        var folder = Path.Combine(Path.GetTempPath(), "lockin-host-" + Guid.NewGuid().ToString("N"));
+        var pipeName = "LockIn.Test." + Guid.NewGuid().ToString("N");
+        Process? process = null;
+        var squatter = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+        try
+        {
+            // Another server holds the only instance, so the host's pipe constructor fails.
+            process = await StartAsync(Path.Combine(folder, "simulation.db"), pipeName);
+            await Task.Delay(2500);
+            Assert.False(process.HasExited, "Host exited after a pipe creation failure.");
+            await squatter.DisposeAsync();
+            Response? response = null;
+            for (var deadline = DateTime.UtcNow.AddSeconds(15); response is not { Ok: true } && DateTime.UtcNow < deadline;)
+            {
+                try { response = await ServiceClient.SendAsync("GetCapabilities", new { }, pipeName: pipeName); }
+                catch (Exception error) when (error is TimeoutException or IOException or OperationCanceledException) { await Task.Delay(500); }
+            }
+            Assert.True(response?.Ok);
+        }
+        finally
+        {
+            await squatter.DisposeAsync();
+            if (process is not null) { if (!process.HasExited) { process.Kill(); await process.WaitForExitAsync(); } process.Dispose(); }
+            if (Directory.Exists(folder)) Directory.Delete(folder, true);
+        }
+    }
+
     private static async Task<Session> StatusAsync(string pipeName)
     {
         var response = await ServiceClient.SendAsync("GetSessionStatus", new { }, pipeName: pipeName);

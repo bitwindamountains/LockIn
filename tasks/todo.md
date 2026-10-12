@@ -30,7 +30,7 @@
 
 ## Task 4: R20-6 pipe construction failure is retried
 - Acceptance:
-  - [ ] A host started while another server holds its pipe name logs the error, survives, and serves once the name is free
+  - [x] A host started while another server holds its pipe name logs the error, survives, and serves once the name is free
 - Verify: `dotnet test --filter HostProcessTests`
 - Files: `src/LockIn.Service/Program.cs`, `tests/LockIn.Core.Tests/HostProcessTests.cs`
 - Depends: none · Size: S
