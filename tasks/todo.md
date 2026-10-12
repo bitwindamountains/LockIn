@@ -76,8 +76,8 @@
 
 ## Task 10: R21-4 remove `ListSessions()` and the `RecoverSimulation` alias
 - Acceptance:
-  - [ ] No production or test references remain; `RecoverSimulation` returns "Unknown command."
-  - [ ] Tests use `GetSession`, `ListHistory` and `RecoverSession` instead
+  - [x] No production or test references remain; `RecoverSimulation` returns "Unknown command."
+  - [x] Tests use `GetSession`, `ListHistory` and `RecoverSession` instead
 - Verify: `dotnet test`
 - Files: `src/LockIn.Infrastructure/LocalStore.cs`, `src/LockIn.Service/SimulationEngine.cs`, `tests/LockIn.Core.Tests/SimulationEngineTests.cs`, `tests/LockIn.Core.Tests/ReviewRegressionTests.cs`
 - Depends: 9 · Size: S

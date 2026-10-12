@@ -236,17 +236,6 @@ public sealed class LocalStore
         command.ExecuteNonQuery();
     }
 
-    public IReadOnlyList<Session> ListSessions()
-    {
-        using var db = Open();
-        using var command = db.CreateCommand();
-        command.CommandText = "SELECT json FROM sessions ORDER BY rowid DESC LIMIT 50";
-        using var reader = command.ExecuteReader();
-        var sessions = new List<Session>();
-        while (reader.Read()) sessions.Add(ReadSession(reader.GetString(0)));
-        return sessions;
-    }
-
     private static Session ReadSession(string json)
     {
         var session = JsonSerializer.Deserialize<Session>(json, JsonOptions.Default) ?? throw new InvalidDataException("Missing session snapshot.");

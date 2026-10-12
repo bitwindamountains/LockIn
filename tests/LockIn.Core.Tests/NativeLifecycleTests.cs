@@ -89,10 +89,14 @@ public class NativeLifecycleTests
             // A live browser session recovers through the Guided delay; the policy stays until release.
             Assert.NotNull((await Desktop<Session>("RecoverSession", new { })).EarlyEndRequestedAtUtc);
             Assert.NotNull((await Browser<BrowserPollResult>("PollBrowser", new BrowserPollPayload(auth, null))).Policy);
-            BrowserPollResult release;
-            var waitUntil = DateTime.UtcNow.AddSeconds(75);
-            while ((release = await Browser<BrowserPollResult>("PollBrowser", new BrowserPollPayload(auth, null))).Policy is not null && DateTime.UtcNow < waitUntil)
-                await Task.Delay(1000);
+            // Like the extension, tolerate a transient unavailable host while waiting for release.
+            BrowserPollResult? release = null;
+            for (var waitUntil = DateTime.UtcNow.AddSeconds(75); release is not { Policy: null } && DateTime.UtcNow < waitUntil; await Task.Delay(1000))
+            {
+                var poll = await Native("PollBrowser", new BrowserPollPayload(auth, null));
+                if (poll.Ok) release = Assert.IsType<JsonElement>(poll.Result).Deserialize<BrowserPollResult>(JsonOptions.Default);
+            }
+            Assert.NotNull(release);
             Assert.Null(release.Policy);
             Assert.Equal(session.Id, release.ReleaseSessionId);
             Assert.Equal(session.PolicyHash, release.ReleasePolicyHash);

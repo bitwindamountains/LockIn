@@ -93,7 +93,6 @@ public sealed class SimulationEngine
                     "CommitSession" => await CommitAsync(request.Payload),
                     "RequestGuidedEnd" => RequestEnd(),
                     "CancelGuidedEnd" => CancelEnd(),
-                    "RecoverSimulation" => Recover(),
                     "RecoverSession" => Recover(),
                     "BeginBrowserPairing" => BeginPairing(),
                     "StageBrowserProfile" => StageBrowser(request.Payload),

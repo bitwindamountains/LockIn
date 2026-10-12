@@ -129,7 +129,7 @@ public sealed class ReviewRegressionTests : IDisposable
         Assert.True((await engine.HandleAsync(Request("CancelPreparation", new CommitPayload(preparation.CandidateId)))).Ok);
         clock.Advance(10);
         Assert.False((await engine.HandleAsync(Request("CommitSession", new CommitPayload(preparation.CandidateId)))).Ok);
-        Assert.Empty(store.ListSessions());
+        Assert.Empty(store.ListHistory());
     }
 
     [Fact]
@@ -147,7 +147,7 @@ public sealed class ReviewRegressionTests : IDisposable
         Assert.True(response.Ok);
         Assert.Equal(SessionState.Completed, Assert.IsType<Session>(response.Result).State);
         Assert.Null(store.GetCurrentSession());
-        Assert.Single(store.ListSessions());
+        Assert.Single(store.ListHistory());
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public sealed class ReviewRegressionTests : IDisposable
         Assert.Equal(SessionState.CleanupPending, Assert.IsType<Session>(response.Result).State);
         Assert.Equal(1, provider.Released); // Backoff prevents every status poll from retrying cleanup.
         await new SimulationEngine(Store(), clock, new NoOpSimulationProvider()).ReconcileAsync();
-        Assert.Equal(SessionState.Recovered, store.ListSessions()[0].State);
+        Assert.Equal(SessionState.Recovered, store.ListHistory()[0].State);
     }
 
     [Fact]
@@ -186,9 +186,10 @@ public sealed class ReviewRegressionTests : IDisposable
         store.SaveSession(SessionLogic.Start(Sample() with { CommitmentMode = CommitmentMode.Committed }, clock.UtcNow, "s1"));
         var engine = new SimulationEngine(store, clock, new NoOpSimulationProvider());
         Assert.False((await engine.HandleAsync(Request("RequestGuidedEnd", new { }))).Ok);
-        Assert.True((await engine.HandleAsync(Request("RecoverSimulation", new { }))).Ok);
+        Assert.Equal("Unknown command.", (await engine.HandleAsync(Request("RecoverSimulation", new { }))).Error);
+        Assert.True((await engine.HandleAsync(Request("RecoverSession", new { }))).Ok);
         await engine.ReconcileAsync();
-        Assert.Equal(SessionState.Recovered, store.ListSessions()[0].State);
+        Assert.Equal(SessionState.Recovered, store.ListHistory()[0].State);
     }
 
     [Fact]
