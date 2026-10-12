@@ -410,7 +410,7 @@ public partial class MainWindow : Window
     private async void CancelEndClick(object sender, RoutedEventArgs e) => await SessionCommandAsync("CancelGuidedEnd");
     private async void RecoverClick(object sender, RoutedEventArgs e)
     {
-        var prompt = _active is { State: SessionState.Active, BrowserInstallationId: not null }
+        var prompt = _active is { State: SessionState.Active, BrowserInstallationId: not null, EarlyEndRequestedAtUtc: null }
             ? "End this browser session through recovery? Restrictions stay on for 60 seconds, then release. This will be recorded in history. Keep the paired browser open until cleanup is confirmed."
             : "Release this session through recovery? This will be recorded in history. Keep the paired browser open until cleanup is confirmed.";
         if (MessageBox.Show(this, prompt, "Recover session", MessageBoxButton.YesNo) == MessageBoxResult.Yes)

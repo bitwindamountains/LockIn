@@ -47,7 +47,7 @@ function Wait-For($Action, [int]$Seconds = 15) {
             }
         }
     }
-    throw 'Timed out waiting for the expected UI or host state.'
+    throw "Timed out waiting for the expected UI or host state (caller line $((Get-PSCallStack)[1].ScriptLineNumber))."
 }
 function Read-Exact($Stream, [int]$Count) {
     $buffer = New-Object byte[] $Count
@@ -61,9 +61,13 @@ function Read-Exact($Stream, [int]$Count) {
     return ,$buffer
 }
 function Send-Request([string]$Type, $Payload = @{}) {
-    $pipe = New-Object IO.Pipes.NamedPipeClientStream('.', $pipeName, [IO.Pipes.PipeDirection]::InOut)
+    # The host serves one connection at a time and drops stalled ones after 4 s; retry a busy endpoint.
+    for ($attempt = 1; ; $attempt++) {
+        $pipe = New-Object IO.Pipes.NamedPipeClientStream('.', $pipeName, [IO.Pipes.PipeDirection]::InOut)
+        try { $pipe.Connect(2000); break }
+        catch { $pipe.Dispose(); if ($attempt -ge 3) { throw } }
+    }
     try {
-        $pipe.Connect(2000)
         $requestId = [guid]::NewGuid().ToString('N')
         $json = @{ protocolVersion = 1; requestId = $requestId; type = $Type; payload = $Payload } | ConvertTo-Json -Compress -Depth 15
         $bytes = [Text.Encoding]::UTF8.GetBytes($json)
@@ -153,6 +157,26 @@ function Confirm-Preflight {
     [LockInSmoke.Native]::GetWindowThreadProcessId($nativeHandle, [ref]$ownerPid) | Out-Null
     if ($ownerPid -ne $desktopProcess.Id -or $nativeHandle -eq [IntPtr]::Zero) { throw 'Confirmation button does not belong to this test process.' }
     if (-not [LockInSmoke.Native]::PostMessage($nativeHandle, 0x00F5, [IntPtr]::Zero, [IntPtr]::Zero)) { throw 'Could not confirm the test preflight.' }
+}
+
+function Decline-Dialog {
+    # Reads this test process's message box text, then answers No (button id 7) without confirming anything.
+    $id = New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::AutomationIdProperty, '7')
+    $process = New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ProcessIdProperty, [int]$desktopProcess.Id)
+    $noButton = New-Object System.Windows.Automation.AndCondition($id, $process)
+    $no = Wait-For { [System.Windows.Automation.AutomationElement]::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $noButton) }
+    $dialog = [System.Windows.Automation.TreeWalker]::ControlViewWalker.GetParent($no)
+    # The Win32 message box exposes its text as static control 65535.
+    $textCondition = New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::AutomationIdProperty, '65535')
+    $text = $dialog.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $textCondition).Current.Name
+    $nativeHandle = [IntPtr]$no.Current.NativeWindowHandle
+    [uint32]$ownerPid = 0
+    [LockInSmoke.Native]::GetWindowThreadProcessId($nativeHandle, [ref]$ownerPid) | Out-Null
+    if ($ownerPid -ne $desktopProcess.Id -or $nativeHandle -eq [IntPtr]::Zero) { throw 'Dialog button does not belong to this test process.' }
+    if (-not [LockInSmoke.Native]::PostMessage($nativeHandle, 0x00F5, [IntPtr]::Zero, [IntPtr]::Zero)) { throw 'Could not decline the test dialog.' }
+    # Let the modal loop end before the caller drives the main window again.
+    Wait-For { $null -eq [System.Windows.Automation.AutomationElement]::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $noButton) } | Out-Null
+    return $text
 }
 
 function Save-WindowImage([string]$Name) {
@@ -375,9 +399,16 @@ try {
         Send-Request 'PollBrowser' @{ auth = $auth; readyProfileHash = $null; errorCode = 'permissionMissing' } | Out-Null
         Wait-For { if ((Find-Control 'CoverageText').Current.Name -like '*Site access was removed*') { $true } } | Out-Null
         Write-Output 'PASS: desktop reflects reported coverage and permission loss from a simulated browser actor.'
+        Select-Tab 'HelpTab'
+        Invoke-Control 'RecoveryButton'
+        if ((Decline-Dialog) -notlike '*60 seconds*') { throw 'Live browser recovery prompt omitted the Guided delay.' }
         $recovering = Send-Request 'RecoverSession'
         if ($recovering.state -ne 'active' -or -not $recovering.earlyEndRequestedAtUtc) { throw 'Live browser recovery skipped the Guided delay.' }
-        Write-Output 'PASS: recovery of a live browser session waits for the Guided delay.'
+        Wait-For { Select-Tab 'FocusTab'; if ((Find-Control 'CancelEndButton').Current.IsEnabled) { $true } } | Out-Null
+        Select-Tab 'HelpTab'
+        Invoke-Control 'RecoveryButton'
+        if ((Decline-Dialog) -like '*60 seconds*') { throw 'Recovery prompt repeated the 60-second promise after an early end was requested.' }
+        Write-Output 'PASS: recovery of a live browser session waits for the Guided delay, and the prompt matches.'
         Select-Tab 'HelpTab'
         Wait-For { if ((Send-Request 'GetSessionStatus').state -eq 'cleanupPending') { $true } } 75 | Out-Null
         if ([DateTimeOffset]::UtcNow -lt [DateTimeOffset]$session.endsAtUtc -and (Find-Control 'RemovalRecoveryButton').Current.IsEnabled) { throw 'Owner recovery enabled before original deadline.' }
