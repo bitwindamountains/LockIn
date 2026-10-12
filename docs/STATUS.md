@@ -1,6 +1,6 @@
 # LockIn progress report
 
-**Updated:** 2026-10-13, review 20  
+**Updated:** 2026-10-13, handoff 20  
 **Stage:** Review 20 and 21 findings (R20-1 to R21-5) fixed; regression checks passed.  
 **Release:** Developer alpha. **Not production ready.**
 
@@ -21,7 +21,7 @@
 - **R18-3 fixed:** pending review and asynchronous profile operations lock conflicting edits/actions. Save, staging and preparation use a captured profile/revision. Back and countdown cancellation restore editing.
 - **R18-6 verified:** the desktop harness restores only its test window and rejects invalid/minimized captures. Deliberate minimization and the entire expanded design check pass.
 
-See the [progress report and evidence](progress/2026-10-01-19-review-fixes.md). The [full review](progress/2026-10-01-18-full-review.md) remains the historical record of the original findings.
+See the [handoff 20 progress report](progress/2026-10-13-20-review-fixes-and-eclipse.md); handoff 19 is in [progress/2026-10-01-19-review-fixes.md](progress/2026-10-01-19-review-fixes.md). The [full review](progress/2026-10-01-18-full-review.md) remains the historical record of the original findings.
 
 ## Latest verification
 
