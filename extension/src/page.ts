@@ -1,5 +1,7 @@
 import { initializeMotion } from './motion';
 import { coverageMessage } from './shared/presentation';
+import { renderScene, setSceneState } from './scene';
+renderScene();
 void initializeMotion();
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 let resourceKey: string | undefined;
@@ -17,6 +19,7 @@ async function update(): Promise<void> {
     const state = await chrome.runtime.sendMessage({ type: 'PopupStatus' });
     if (!state || state.error) throw new Error(state?.error ?? 'Session status unavailable.');
     element('error').textContent = '';
+    setSceneState(state.policy ? 'active' : state.coverageIssue ? 'attention' : 'idle');
     element('timer').textContent = state.policy
       ? `${Math.ceil(state.remaining / 60)} min remaining` : state.coverageIssue ? 'Recovery needed' : 'No active session';
     element('status').textContent = coverageMessage(state.coverageIssue, state.policy
@@ -47,6 +50,7 @@ async function update(): Promise<void> {
       ? 'No study links in this session. Add links in LockIn for next time.'
       : 'Your study links will appear when a browser session starts.';
   } catch (error) {
+    setSceneState('attention');
     element('timer').textContent = 'Status unavailable';
     element('error').textContent = 'Could not check this session. Open LockIn or try again.';
     element('status').textContent = 'Current coverage could not be confirmed.';

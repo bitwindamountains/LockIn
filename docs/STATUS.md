@@ -6,6 +6,7 @@
 
 ## Accomplished
 
+- **Lamplit desk redesign:** the browser popup, study page and blocked page now share a night-desk scene. The lamp leans in and switches on for an active session, the mug steams, and the bulb turns amber-red when attention is needed. The blocked page tucks the site into a sealed "later" envelope. Study links are hover cards. The desktop session ticket shows the same lamp, a night gradient and an amber clock while running. Reduced motion shows resting states. All extension suites and all three desktop harness modes pass.
 - **R21-5 fixed:** pipe client I/O no longer resumes on the caller's thread. From the desktop, a request used to continue on the WPF UI thread while holding the host's only pipe instance, so a busy UI could stall every client, browser bridge included, for up to 4 s. A test with a stalled synchronization context failed before the fix.
 - **R21-3/R21-4 done:** one shared unreadable-snapshot filter in `LocalStore`. The unused `ListSessions()` and the `RecoverSimulation` alias were removed with owner approval; tests use `ListHistory` and `RecoverSession`. The native-bridge process test now tolerates a transient unavailable host while it waits for release, as the extension does.
 - **R21-2 fixed:** the recover prompt promises the 60-second delay only when no early end is already pending. The desktop browser-recovery run now reads both prompts. The harness retries a busy pipe connection and reports which wait timed out.
