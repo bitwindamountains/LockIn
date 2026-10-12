@@ -24,7 +24,7 @@ Source: `SPEC.md`. Tasks are tracked in `tasks/todo.md`. Work happens on branch 
 ### Checkpoint C: all suites pass; STATUS.md final
 ### Phase 3: Review 21 follow-ups
 - [x] Task 7: R21-1 history rows with unknown times show "Date unknown"
-- [ ] Task 8: R21-2 recover prompt only promises 60 s when no early end is pending
+- [x] Task 8: R21-2 recover prompt only promises 60 s when no early end is pending
 - [ ] Task 9: R21-3 single unreadable-snapshot filter in LocalStore
 - [ ] Task 10: R21-4 remove `ListSessions()` and the `RecoverSimulation` alias
 ### Checkpoint D: .NET suite, extension suites and desktop browser-recovery run pass; STATUS.md updated

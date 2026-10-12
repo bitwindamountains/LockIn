@@ -61,8 +61,8 @@
 
 ## Task 8: R21-2 recover prompt only promises 60 s when no early end is pending
 - Acceptance:
-  - [ ] Pressing Recover with a Guided end already pending shows the neutral prompt
-  - [ ] The desktop harness reads the dialog text in both cases
+  - [x] Pressing Recover with a Guided end already pending shows the neutral prompt
+  - [x] The desktop harness reads the dialog text in both cases
 - Verify: `scripts/test-desktop.ps1 -Configuration Release -BrowserRecovery`
 - Files: `src/LockIn.Desktop/MainWindow.xaml.cs`, `scripts/test-desktop.ps1`
 - Depends: none · Size: S
