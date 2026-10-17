@@ -61,5 +61,8 @@ async function update(): Promise<void> {
   }
 }
 element('refresh').addEventListener('click', () => void update());
-void update();
-setInterval(() => void update(), 5000);
+// Embedded in another site's frame, stay inert: never poll the host from there.
+if (window.top === window) {
+  void update();
+  setInterval(() => void update(), 5000);
+}

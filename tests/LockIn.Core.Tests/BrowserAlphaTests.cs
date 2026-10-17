@@ -37,6 +37,32 @@ public sealed class BrowserAlphaTests : IDisposable
         return Assert.IsType<Session>((await Send("CommitSession", new CommitPayload(candidate.CandidateId))).Result);
     }
     [Fact]
+    public async Task PairingRejectsWrongExpiredReusedAndOverLimitCodes()
+    {
+        async Task<string> Begin() => JsonSerializer.SerializeToElement((await Send("BeginBrowserPairing", new { })).Result, JsonOptions.Default).GetProperty("code").GetString()!;
+        Task<Response> Try(string code) => Send("PairBrowser", new PairBrowserPayload(code, Guid.NewGuid().ToString("N"), "Test browser"));
+        static string Wrong(string code) => code == "111111" ? "222222" : "111111";
+        // A malformed code does not count; the fifth attempt may still succeed, and the code is single use.
+        var code = await Begin();
+        Assert.False((await Try("12345")).Ok);
+        for (var i = 0; i < 4; i++) Assert.False((await Try(Wrong(code))).Ok);
+        Assert.True((await Try(code)).Ok);
+        Assert.False((await Try(code)).Ok);
+
+        // After five wrong attempts the right code is refused.
+        code = await Begin();
+        for (var i = 0; i < 5; i++) Assert.False((await Try(Wrong(code))).Ok);
+        Assert.False((await Try(code)).Ok);
+
+        code = await Begin();
+        clock.UtcNow = clock.UtcNow.AddSeconds(121);
+        Assert.False((await Try(code)).Ok);
+
+        while (store.ListBrowsers().Count < 10) Assert.True((await Try(await Begin())).Ok);
+        Assert.False((await Send("BeginBrowserPairing", new { })).Ok);
+    }
+
+    [Fact]
     public async Task BrowserRequiresActivationAndReleaseAcknowledgments()
     {
         var auth = await Pair();

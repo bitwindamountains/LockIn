@@ -16,6 +16,8 @@ const redirected = new Map<number, string>();
 // Open tabs are swept once per session per worker; later navigation is covered by DNR, onUpdated and the registered content script.
 let sweptSessionId: string | null = null;
 let observed: { sessionId: string; lastUtc: number } | null = null;
+// The host keeps reporting the latest released session; acknowledge each release once per worker.
+let acknowledgedRelease: string | null = null;
 const initialize = chrome.storage.local.setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' });
 const enqueue = <T>(work: () => Promise<T>): Promise<T> => {
   const next = serial.then(work, work); serial = next.catch(() => undefined); return next;
@@ -61,10 +63,12 @@ async function release(): Promise<void> {
     try { await chrome.storage.local.set({ ended: [...new Set([...ended, cache.policy.sessionId])].slice(-20) }); }
     catch (error) { markerFailure = error; }
   }
-  const rules = await chrome.declarativeNetRequest.getDynamicRules();
-  await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: rules.filter(r => ownedRule(r.id)).map(r => r.id) });
-  const scripts = await chrome.scripting.getRegisteredContentScripts();
-  if (scripts.some(s => s.id === 'lockin-youtube')) await chrome.scripting.unregisterContentScripts({ ids: ['lockin-youtube'] });
+  const owned = (await chrome.declarativeNetRequest.getDynamicRules()).filter(r => ownedRule(r.id)).map(r => r.id);
+  const registered = (await chrome.scripting.getRegisteredContentScripts()).some(s => s.id === 'lockin-youtube');
+  // Nothing applied: skip the YouTube tab sweep that idle 5-second syncs would otherwise repeat forever.
+  if (!cache && owned.length === 0 && !registered) return;
+  if (owned.length > 0) await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: owned });
+  if (registered) await chrome.scripting.unregisterContentScripts({ ids: ['lockin-youtube'] });
   const tabs = await chrome.tabs.query({ url: 'https://www.youtube.com/*' });
   await Promise.all(tabs.filter(tab => tab.id !== undefined).map(tab =>
     chrome.tabs.sendMessage(tab.id!, { type: 'Release' }).catch(() => undefined)));
@@ -164,8 +168,11 @@ async function synchronize(): Promise<void> {
       }
     } else {
       try { await release(); } catch (error) { coverageIssue = 'cleanupFailed'; throw error; }
-      if (response.releaseSessionId && response.releasePolicyHash)
+      const releaseKey = response.releaseSessionId && response.releasePolicyHash ? `${response.releaseSessionId}:${response.releasePolicyHash}` : null;
+      if (releaseKey && releaseKey !== acknowledgedRelease) {
         await native('AcknowledgeBrowserPolicy', { auth, sessionId: response.releaseSessionId, policyHash: response.releasePolicyHash, released: true });
+        acknowledgedRelease = releaseKey;
+      }
       coverageIssue = null;
       message = response.stagedProfileHash ? (readyProfileHash ? 'Ready for a browser session.' : 'Review and grant this profile’s site access.') : 'Connected. Send a profile from the desktop.';
     }
@@ -212,7 +219,8 @@ async function redirectVideo(tabId: number, videoId: string, policy: Policy, key
   } finally { inFlight.delete(tabId); }
 }
 async function handle(request: any, sender: chrome.runtime.MessageSender): Promise<unknown> {
-  const extensionPage = sender.id === chrome.runtime.id && sender.url?.startsWith(chrome.runtime.getURL(''));
+  // A web page can embed blocked.html; only top-level extension pages and the popup may drive the host.
+  const extensionPage = sender.id === chrome.runtime.id && sender.url?.startsWith(chrome.runtime.getURL('')) && (sender.tab === undefined || sender.frameId === 0);
   if (extensionPage) {
     if (request?.type === 'PopupStatus') {
       const { auth } = await state(); const cache = await current();
