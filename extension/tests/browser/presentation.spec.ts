@@ -91,7 +91,13 @@ test('study pages fit six widths and polling preserves focused resource links', 
   await expect(page.locator('#timer')).toHaveText('Recovery needed');
   await expect(page.getByRole('status')).toContainText('Cleanup is unconfirmed');
   await page.goto('https://lockin.test/blocked.html');
+  await expect(page.getByRole('heading', { name: 'Your session has ended.' })).toBeVisible();
+  await expect(page.getByRole('status')).toHaveText('No session is running in this browser.');
+  await expect(page.locator('footer')).toHaveText('Revisit the site from the address bar. Tabs do not reopen automatically.');
+  await page.evaluate(() => { (window as any).fixture.state.policy = { endsAtUtc: new Date(Date.now() + 600000).toISOString(), studyResources: [] }; });
+  await page.getByRole('button', { name: 'Check session' }).click();
   await expect(page.getByRole('heading', { name: 'This can wait.' })).toBeVisible();
+  await expect(page.locator('footer')).toContainText('When your session ends');
   for (const width of [320, 375, 768, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

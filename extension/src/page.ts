@@ -5,6 +5,9 @@ renderScene();
 void initializeMotion();
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 let resourceKey: string | undefined;
+// Headings and notes carry an optional idle variant in data-idle; session wording stays the default.
+const variants = [element('page-title'), element('note')].map(node => ({ node, active: node.textContent ?? '' }));
+const showIdle = (idle: boolean) => { for (const { node, active } of variants) node.textContent = idle ? node.dataset.idle ?? active : active; };
 let updating = false;
 
 async function update(): Promise<void> {
@@ -20,11 +23,12 @@ async function update(): Promise<void> {
     if (!state || state.error) throw new Error(state?.error ?? 'Session status unavailable.');
     element('error').textContent = '';
     setSceneState(state.policy ? 'active' : state.coverageIssue ? 'attention' : 'idle');
+    showIdle(!state.policy);
     element('timer').textContent = state.policy
       ? `${Math.ceil(state.remaining / 60)} min remaining` : state.coverageIssue ? 'Recovery needed' : 'No active session';
     element('status').textContent = coverageMessage(state.coverageIssue, state.policy
       ? `Ends at ${new Date(state.policy.endsAtUtc).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}. ${state.message}`
-      : `No active browser policy remains. ${state.message ?? ''}`);
+      : 'No session is running in this browser.');
     const links: string[] = (state.policy?.studyResources ?? []).filter((value: string) => {
       try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password; } catch { return false; }
     });
