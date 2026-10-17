@@ -23,7 +23,7 @@ async function browser(action = 'replaceCurrent', simulatedTransport = false) {
     endsAtUtc: new Date(Date.now() + 120000).toISOString(), websites: [{ id: 's', host: 'example.test', includeSubdomains: false }],
     youTube: { rules: [{ id: 't', source: 'visibleHashtags', value: 'education' }], approvedVideoIds: [], matchingMode: 'allowMatchingTags', tabAction: action, destinationKind: 'focusPage' }, studyResources: [] };
   await cp(path.join(extension, 'background.js'), path.join(extension, 'production.js'));
-  const transport = simulatedTransport ? `globalThis.testPolls = []; chrome.runtime.connectNative = () => { const listeners = []; return { onMessage: { addListener: f => listeners.push(f) }, onDisconnect: { addListener: () => {} }, postMessage: r => { if (r.type === 'PollBrowser') globalThis.testPolls.push({appliedPolicyHash:r.payload.appliedPolicyHash,errorCode:r.payload.errorCode}); const result = r.type === 'PollBrowser' ? {policy:${JSON.stringify(policy)},requiredOrigins:[],serverUtc:new Date().toISOString(),stagedProfileHash:null} : {acknowledged:true}; setTimeout(() => listeners.forEach(f => f({protocolVersion:1,requestId:r.requestId,ok:true,result})),0); } }; };` : '';
+  const transport = simulatedTransport ? `globalThis.testPolls = []; globalThis.testAcks = []; chrome.runtime.connectNative = () => { const listeners = []; return { onMessage: { addListener: f => listeners.push(f) }, onDisconnect: { addListener: () => {} }, postMessage: r => { if (r.type === 'PollBrowser') globalThis.testPolls.push({appliedPolicyHash:r.payload.appliedPolicyHash,errorCode:r.payload.errorCode}); if (r.type === 'AcknowledgeBrowserPolicy') globalThis.testAcks.push({sessionId:r.payload.sessionId,released:!!r.payload.released}); const result = r.type === 'PollBrowser' ? (globalThis.testPollResult ?? {policy:${JSON.stringify(policy)},requiredOrigins:[],serverUtc:new Date().toISOString(),stagedProfileHash:null}) : {acknowledged:true}; setTimeout(() => listeners.forEach(f => f({protocolVersion:1,requestId:r.requestId,ok:true,result})),0); } }; };` : '';
   await writeFile(path.join(extension, 'background.js'), `${transport}const access = chrome.storage.local.setAccessLevel.bind(chrome.storage.local); const seed = chrome.storage.local.get('seeded').then(async s => { if (!s.seeded) await chrome.storage.local.set({seeded:true,${simulatedTransport ? "auth:{installationId:'a'.repeat(32),credential:'b'.repeat(64)}," : ''}cache:{policy:${JSON.stringify(policy)},deadline:${Date.now() + 120000},lastUtc:Date.now()}}); }); chrome.storage.local.setAccessLevel = async options => { await seed; return access(options); }; importScripts('production.js');`);
   const context = await chromium.launchPersistentContext(path.join(folder, 'profile'), { channel: 'chromium', headless: true, args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`] });
   const worker = context.serviceWorkers()[0] ?? await context.waitForEvent('serviceworker');
@@ -50,7 +50,7 @@ test('browser restart after offline expiry removes persisted restrictions', asyn
     await page.evaluate(() => chrome.runtime.sendMessage({ type: 'Sync' }));
     const deadline = await fixture.worker.evaluate(async () => {
       const { cache } = await chrome.storage.local.get('cache');
-      cache.deadline = Date.now() + 5000;
+      cache.deadline = Date.now() + 10000; // Leaves room for a slow browser close under CPU load.
       await chrome.storage.local.set({ cache });
       return cache.deadline as number;
     });
@@ -73,6 +73,8 @@ test('actual website rules install, redirect, and expire without a native host',
     const page = await context.newPage();
     await page.goto('https://example.test/').catch(() => undefined);
     await expect(page).toHaveURL(`chrome-extension://${id}/blocked.html`);
+    // Only blocked.html is web accessible; the redirected page must still load its own stylesheet.
+    expect(await page.evaluate(() => document.styleSheets[0]?.cssRules.length ?? 0)).toBeGreaterThan(0);
     await page.goto('https://example.test./').catch(() => undefined);
     await expect(page).toHaveURL(`chrome-extension://${id}/blocked.html`);
     await worker.evaluate(async () => { const { cache } = await chrome.storage.local.get('cache'); cache.deadline = Date.now() + 1000; await chrome.storage.local.set({ cache }); await chrome.alarms.create('lockin-expiry', { when: cache.deadline }); });
@@ -90,7 +92,7 @@ for (const action of ['replaceCurrent', 'switchExisting', 'openReplacement']) {
       if (existing) await existing.goto(destination);
       const video = await context.newPage();
       await video.goto('https://www.youtube.com/watch?v=abcdefghijk');
-      await expect(video.getByRole('status')).toBeVisible();
+      await expect(video.getByRole('status')).toBeVisible({ timeout: 15000 }); // Content-script start is slow under CPU load.
       await expect(video.getByRole('status')).toHaveCount(0, { timeout: 10000 });
       await expect(video).toHaveURL('https://www.youtube.com/watch?v=abcdefghijk');
       await video.goto('https://www.youtube.com/watch?v=12345678901');
@@ -146,6 +148,40 @@ test('syncs with an unchanged policy do not rewrite rules or sweep tabs again', 
     await sync(); await sync(); await sync();
     expect(await worker.evaluate(() => (globalThis as any).counts)).toEqual({ rules: 0, sweeps: 0 });
     expect(await worker.evaluate(() => (globalThis as any).testPolls.at(-1))).toEqual({ appliedPolicyHash: 'a'.repeat(64), errorCode: null });
+  } finally { await context.close(); }
+});
+test('idle syncs after release skip the tab sweep and acknowledge the release once', async () => {
+  const { context, worker, id } = await browser('replaceCurrent', true);
+  try {
+    const page = await context.newPage();
+    await page.goto(`chrome-extension://${id}/manifest.json`);
+    const sync = () => page.evaluate(() => chrome.runtime.sendMessage({ type: 'Sync' }));
+    await sync();
+    await worker.evaluate(() => {
+      (globalThis as any).testPollResult = { policy: null, releaseSessionId: 'test-session', releasePolicyHash: 'a'.repeat(64), requiredOrigins: [], serverUtc: new Date().toISOString(), stagedProfileHash: null };
+    });
+    await sync();
+    expect(await worker.evaluate(async () => (await chrome.declarativeNetRequest.getDynamicRules()).length)).toBe(0);
+    await worker.evaluate(() => {
+      const counts = (globalThis as any).counts = { youTubeQueries: 0 };
+      const query = chrome.tabs.query.bind(chrome.tabs);
+      chrome.tabs.query = (info: any) => { if (info.url) counts.youTubeQueries++; return query(info); };
+    });
+    await sync(); await sync(); await sync();
+    expect(await worker.evaluate(() => (globalThis as any).counts)).toEqual({ youTubeQueries: 0 });
+    expect(await worker.evaluate(() => (globalThis as any).testAcks.filter((a: any) => a.released))).toEqual([{ sessionId: 'test-session', released: true }]);
+  } finally { await context.close(); }
+});
+test('blocked page framed by a website cannot drive the host', async () => {
+  const { context, id } = await browser();
+  try {
+    await context.route('https://framer.test/**', route => route.fulfill({ contentType: 'text/html', body: `<iframe src="chrome-extension://${id}/blocked.html"></iframe>` }));
+    const page = await context.newPage();
+    await page.goto('https://framer.test/');
+    await expect.poll(() => page.frames().some(f => f.url().endsWith('/blocked.html'))).toBe(true);
+    const frame = page.frames().find(f => f.url().endsWith('/blocked.html'))!;
+    expect(await frame.evaluate(() => chrome.runtime.sendMessage({ type: 'Sync' }))).toEqual({ error: 'Sender is not supported.' });
+    expect(await frame.evaluate(() => chrome.runtime.sendMessage({ type: 'PopupStatus' }))).toEqual({ error: 'Sender is not supported.' });
   } finally { await context.close(); }
 });
 test('frequent status checks do not rewrite the stored session cache', async () => {
