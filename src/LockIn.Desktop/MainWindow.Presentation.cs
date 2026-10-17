@@ -212,6 +212,7 @@ public partial class MainWindow
         glint.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(1700))));
         Bead.BeginAnimation(OpacityProperty, glint);
         var breathe = new DoubleAnimation(1, 1.04, TimeSpan.FromMilliseconds(3500)) { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, BeginTime = TimeSpan.FromMilliseconds(2000), EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut } };
+        Timeline.SetDesiredFrameRate(breathe, 15); // A slow 4% swell needs no 60 fps; full rate cost ~6% GPU while visible.
         CoronaScale.BeginAnimation(ScaleTransform.ScaleXProperty, breathe);
         CoronaScale.BeginAnimation(ScaleTransform.ScaleYProperty, breathe);
     }
