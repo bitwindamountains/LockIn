@@ -1,11 +1,16 @@
 # LockIn progress report
 
-**Updated:** 2026-10-13, handoff 20  
-**Stage:** Review 20 and 21 findings (R20-1 to R21-5) fixed; regression checks passed.  
+**Updated:** 2026-10-17, handoff 21  
+**Stage:** Deployment-readiness review done (no-go for production, go as alpha); browser-bridge hardening, eclipse performance fix and extension polish landed.  
 **Release:** Developer alpha. **Not production ready.**
 
 ## Accomplished
 
+- **Handoff 21 (2026-10-17):** see the [handoff 21 progress report](progress/2026-10-17-21-ship-review-hardening-and-polish.md).
+  - **Readiness review:** three parallel reviews (code, security, tests) found no new Critical defect, no secrets and no vulnerable dependencies. Production stays blocked by R18-1, R18-4 and R18-5.
+  - **Browser-bridge hardening:** only `blocked.html` is web accessible; framed extension pages cannot drive the host. Idle syncs skip the YouTube tab sweep, and each release is acknowledged once per worker. Pairing limits are now tested, and two load-sensitive browser tests have more time.
+  - **Eclipse performance:** the desktop corona breathing is capped at 15 fps. With a session active and the window visible, CPU fell from about 3.9% to 1.7% and GPU from 6.6–11.3% to 2.8%.
+  - **Extension polish:** the popup moon says "Status unavailable" when the host is unreachable (and the eclipse turns to attention). Error alerts, the study-link arrow and browser surfaces follow the design system. Idle pages use plain wording ("No session is running in this browser."; blocked page "Your session has ended."), without claiming cleanup.
 - **Eclipse redesign (supersedes the lamplit desk):** the desktop app, popup, study page and blocked page share a night-sky identity. A solar eclipse holds the clock: partial when idle, total during a session (corona bloom and a diamond-ring glint), slipping with a red corona when attention is needed. Surfaces are frosted glass over an aurora. Primary actions use an ember gradient. Geist and Geist Mono are bundled. All extension suites pass, as do the desktop design, full-session and browser-recovery harness modes.
 - **R21-5 fixed:** pipe client I/O no longer resumes on the caller's thread. From the desktop, a request used to continue on the WPF UI thread while holding the host's only pipe instance, so a busy UI could stall every client, browser bridge included, for up to 4 s. A test with a stalled synchronization context failed before the fix.
 - **R21-3/R21-4 done:** one shared unreadable-snapshot filter in `LocalStore`. The unused `ListSessions()` and the `RecoverSimulation` alias were removed with owner approval; tests use `ListHistory` and `RecoverSession`. The native-bridge process test now tolerates a transient unavailable host while it waits for release, as the extension does.
@@ -21,17 +26,17 @@
 - **R18-3 fixed:** pending review and asynchronous profile operations lock conflicting edits/actions. Save, staging and preparation use a captured profile/revision. Back and countdown cancellation restore editing.
 - **R18-6 verified:** the desktop harness restores only its test window and rejects invalid/minimized captures. Deliberate minimization and the entire expanded design check pass.
 
-See the [handoff 20 progress report](progress/2026-10-13-20-review-fixes-and-eclipse.md); handoff 19 is in [progress/2026-10-01-19-review-fixes.md](progress/2026-10-01-19-review-fixes.md). The [full review](progress/2026-10-01-18-full-review.md) remains the historical record of the original findings.
+See the [handoff 21 progress report](progress/2026-10-17-21-ship-review-hardening-and-polish.md) and the [handoff 20 progress report](progress/2026-10-13-20-review-fixes-and-eclipse.md); handoff 19 is in [progress/2026-10-01-19-review-fixes.md](progress/2026-10-01-19-review-fixes.md). The [full review](progress/2026-10-01-18-full-review.md) remains the historical record of the original findings.
 
 ## Latest verification
 
 | Check | Result |
 | --- | --- |
-| Release build | Passed, zero warnings/errors |
-| .NET suite | 53 passed |
+| Release build | Passed, zero warnings/errors (2026-10-17) |
+| .NET suite | 54 passed (2026-10-17, adds pairing limits) |
 | Extension typecheck/build | Passed |
 | Policy/content-script tests | 15 passed: 7 policy plus 8 fault/lifecycle cases |
-| Chromium enforcement/recovery/motion and presentation | 13 passed (website case includes a trailing-dot host; new unchanged-policy sync and status-throttle cases) |
+| Chromium enforcement/recovery/motion and presentation | 15 passed (2026-10-17; adds framed-page refusal and idle-release cases; idle and session wording on the blocked page) |
 | Expanded desktop design | Passed: deliberate window restoration, review action guards, browser staging guard, compact layouts and validation focus |
 | Desktop editor | Passed |
 | Desktop full session/history | Passed (2026-10-13) |
@@ -47,7 +52,7 @@ To load these changes, reopen LockIn and reload the unpacked extension at `brave
 
 ## Remaining production gates and next step
 
-Next: complete a dedicated installed-Brave permission/activation/expiry/recovery walkthrough through the native bridge, then live YouTube and remaining failure acceptance.
+Next: an owner decision on indexing browser polling (`LocalStore.cs:180` scans every session row with `json_extract` on each poll; the fix is a schema change). Then complete a dedicated installed-Brave permission/activation/expiry/recovery walkthrough through the native bridge, then live YouTube and remaining failure acceptance.
 
 Open review gates: **R18-1** real Windows service/app enforcement and packaging; **R18-4** installed/physical platform acceptance; **R18-5** retention/deletion and sanitized diagnostics controls. Windows 11, physical sleep/reboot, screen-reader, high-contrast and DPI/scaling checks remain required. A dedicated Windows test environment will be needed for installation/disruption work.
 
