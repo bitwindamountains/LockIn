@@ -61,4 +61,4 @@ element('grant').addEventListener('click', () => {
 });
 element('sync').addEventListener('click', () => void action('sync', 'Checking…', () => chrome.runtime.sendMessage({ type: 'Sync' })));
 void action('sync', 'Checking…', () => chrome.runtime.sendMessage({ type: 'Sync' }));
-setInterval(() => { if (!busy) void refresh().catch(() => { setSceneState('attention'); element('status').textContent = 'Connection unavailable. Open LockIn or check again.'; }); }, 1000);
+setInterval(() => { if (!busy) void refresh().catch(() => { setSceneState('attention'); element('timer').textContent = 'Status unavailable'; element('status').textContent = 'Connection unavailable. Open LockIn or check again.'; }); }, 1000);
