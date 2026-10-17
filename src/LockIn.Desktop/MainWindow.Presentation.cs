@@ -56,7 +56,6 @@ public partial class MainWindow
         ProfilesBox.Margin = new Thickness(0, 8, 0, compact ? 4 : 16);
         DurationHint.Visibility = Show(!compact);
         SetupPanel.Padding = new Thickness(compact ? 16 : 24);
-        SessionTicket.Padding = new Thickness(compact ? 16 : 24);
         ReviewPanel.Padding = new Thickness(compact ? 16 : 24);
         SessionTicket.Padding = new Thickness(compact ? 18 : 26);
         FocusHeading.FontSize = compact ? 26 : 32;
