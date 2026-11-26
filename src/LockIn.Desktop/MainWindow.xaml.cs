@@ -20,6 +20,7 @@ public partial class MainWindow : Window
     private Session? _active;
     private string? _lastActiveId;
     private string? _completionText;
+    private string? _startedMessage;
     private int _browserRefreshTick;
     private IReadOnlyList<BrowserConnection> _browserConnections = [];
     private readonly string _pipeName = Environment.GetEnvironmentVariable("LOCKIN_SIMULATION_PIPE") ?? PipeTransport.PipeName;
@@ -109,6 +110,9 @@ public partial class MainWindow : Window
                 SetProgress(0);
                 if (_lastActiveId is not null)
                 {
+                    // The start message describes the session that just ended; later messages (e.g. recovery) are kept.
+                    if (MessageText.Text == _startedMessage) MessageText.Text = "";
+                    _startedMessage = null;
                     var history = await CallAsync<List<SessionHistoryItem>>("ListSessions", new { }) ?? [];
                     var finished = history.FirstOrDefault(s => s.Id == _lastActiveId);
                     if (finished is not null) StatusText.Text = _completionText = finished.CleanupEvidence == "ownerReportedRemoval"
@@ -371,7 +375,7 @@ public partial class MainWindow : Window
             _countdown.Token.ThrowIfCancellationRequested();
             await CallAsync<Session>("CommitSession", new CommitPayload(_candidateId), _countdown.Token);
             _candidateId = null;
-            MessageText.Text = useBrowser ? "Waiting for the browser to confirm its rules. Session status will show Active only after acknowledgment." : "Simulated session active. You can close and reopen this window.";
+            MessageText.Text = _startedMessage = useBrowser ? "Waiting for the browser to confirm its rules. Session status will show Active only after acknowledgment." : "Simulated session active. You can close and reopen this window.";
         }
         catch (OperationCanceledException) { MessageText.Text = _countdown?.IsCancellationRequested == true
             ? "Countdown cancelled. Checking the current session."

@@ -62,10 +62,22 @@ Installed Brave and live YouTube after these changes, including whether the trim
 
 ## Open findings from the readiness review
 
-- **Needs owner approval (schema change):** browser polling filters sessions with an unindexed `json_extract` (`LocalStore.cs:180`), a full scan per poll that grows with history. Proposed fix: an indexed `browser_installation_id` column.
+- **Polling index: measured and rejected.** The review called the unindexed `json_extract` lookup in `GetLatestBrowserSession` (`LocalStore.cs:180`) a full scan per poll that grows with history. The owner approved an index, so it was measured first: an expression index on the same `json_extract`, additive and without a schema version bump. See the polling-index section below.
 - **Before a real enforcement provider:** a release inside `HandleAsync` can outlast the host's 4 s request budget (`Program.cs:424`).
 - **Low / informational:** a silent same-user client can hold the host's only pipe instance; another Windows account can take the pipe name first (denial of service only); `LOCKIN_NATIVE_CONFIG` is honoured in release builds; engine exception messages reach the extension verbatim; the manifest has no `key`, so the unpacked extension ID depends on its path; `blocked.html` still lets sites detect LockIn (`use_dynamic_url` untested).
 - **Test gaps:** readiness lost during countdown, mismatched or missing pipe replies, concurrent countdowns, malformed frame headers, native-host field validation, a damaged newest row in browser lookup, and popup coverage-issue states.
+
+## Polling index: measured, reverted
+
+Temporary test, not committed. 20,000 finished browser sessions across 10 browsers, 200 lookups per run, Debug build:
+
+| Configuration | Query plan | Time per lookup |
+| --- | --- | --- |
+| No index | `SCAN sessions` | 2.41 / 2.71 / 2.56 ms |
+| Expression index `idx_sessions_browser` | `SEARCH sessions USING INDEX` | 2.37 / 2.50 / 2.13 ms |
+| Primary-key `GetSession(id)`, reference | row id | 2.62 / 3.10 / 2.59 ms |
+
+The index changed the plan but not the time, which is within run-to-run noise and equal to a primary-key fetch. About 2.5 ms per call is opening a fresh SQLite connection (`LocalStore` uses `Pooling = false`). The scan is negligible even at 20,000 sessions, far beyond realistic history. The index was reverted and no schema change shipped. If per-poll cost ever matters, measure the connection open first; do not retry the index.
 
 ## Owner handoff
 
@@ -73,4 +85,4 @@ Reload the unpacked extension at `brave://extensions` and reopen LockIn between 
 
 ## Next
 
-Owner decision on the polling index. Then the installed-Brave walkthrough and the remaining production gates (R18-1, R18-4, R18-5).
+The installed-Brave walkthrough and the remaining production gates (R18-1, R18-4, R18-5).

@@ -30,4 +30,5 @@ When temporarily mutating source to prove a test (copy, edit, then restore), tou
 - Only `blocked.html` is web accessible (the website-rule redirect needs it). Extension pages inside a website's frame are refused by `background.ts` and never poll. Keep it that way when adding pages or resources.
 - Destination-page headings and footers carry an idle variant in `data-idle`; `page.ts` swaps it when no session is running. Never word an idle state as confirmed cleanup.
 - Motion is presentation only. Resting CSS styles are the final state, and keyframes animate only from them, so reduced motion still shows the correct state. In WPF, gate animations on `MotionEnabled`, and cap looping animations' frame rate (`Timeline.SetDesiredFrameRate`); the 60 fps corona cost about 6% GPU.
+- Do not index the browser-session lookup (`GetLatestBrowserSession`): it was measured on 2026-10-17 and gained nothing, because each `LocalStore` call's cost is opening a connection (`Pooling = false`), about 2.5 ms. See the handoff 21 report.
 - Asking first is required for: schema changes or migrations, the native command allowlist, new dependencies, and deleting code or data.

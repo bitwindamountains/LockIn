@@ -6,6 +6,7 @@
 
 ## Accomplished
 
+- **Stale session message fixed (2026-10-18):** the "Simulated session active…" or "Waiting for the browser…" line above the tabs stayed after the session ended, until the window was reopened. It now clears when the host reports the session finished, unless a later message (such as a recovery confirmation) has replaced it. Verified in one window with an isolated one-minute simulation; `dotnet test` (54) and the default desktop harness pass. The harness reopens the window mid-session, so it does not cover this path.
 - **Handoff 21 (2026-10-17):** see the [handoff 21 progress report](progress/2026-10-17-21-ship-review-hardening-and-polish.md).
   - **Readiness review:** three parallel reviews (code, security, tests) found no new Critical defect, no secrets and no vulnerable dependencies. Production stays blocked by R18-1, R18-4 and R18-5.
   - **Browser-bridge hardening:** only `blocked.html` is web accessible; framed extension pages cannot drive the host. Idle syncs skip the YouTube tab sweep, and each release is acknowledged once per worker. Pairing limits are now tested, and two load-sensitive browser tests have more time.
@@ -52,7 +53,7 @@ To load these changes, reopen LockIn and reload the unpacked extension at `brave
 
 ## Remaining production gates and next step
 
-Next: an owner decision on indexing browser polling (`LocalStore.cs:180` scans every session row with `json_extract` on each poll; the fix is a schema change). Then complete a dedicated installed-Brave permission/activation/expiry/recovery walkthrough through the native bridge, then live YouTube and remaining failure acceptance.
+Indexing browser polling was measured and rejected (2026-10-17, see the handoff 21 report): the lookup's cost is opening a SQLite connection, not the scan. Next: complete a dedicated installed-Brave permission/activation/expiry/recovery walkthrough through the native bridge, then live YouTube and remaining failure acceptance.
 
 Open review gates: **R18-1** real Windows service/app enforcement and packaging; **R18-4** installed/physical platform acceptance; **R18-5** retention/deletion and sanitized diagnostics controls. Windows 11, physical sleep/reboot, screen-reader, high-contrast and DPI/scaling checks remain required. A dedicated Windows test environment will be needed for installation/disruption work.
 
