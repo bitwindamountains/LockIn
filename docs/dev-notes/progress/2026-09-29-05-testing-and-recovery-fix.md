@@ -37,10 +37,10 @@ The recovery UI walkthrough simulates a browser actor via the host pipe. It chec
 - Final full session: `%TEMP%\lockin-ui-92bccab9cd9d497c82d9e1109a117528`.
 - Owner recovery: `%TEMP%\lockin-ui-66ca68a07aee4aee925606eca817f74e`.
 - Generated browser captures: `extension/test-results`; disposable profiles: `%TEMP%\lockin-chromium-*`.
-- [Owner-recovery capture](../images/owner-recovery-2026-09-29.png) shows explicit unverified-cleanup wording. Window capture clips part of the lower rendered area; this is not a full scaling/accessibility review.
+- [Owner-recovery capture](../../images/owner-recovery-2026-09-29.png) shows explicit unverified-cleanup wording. Window capture clips part of the lower rendered area; this is not a full scaling/accessibility review.
 
 ## Scope and remaining work
 
 No Windows service, native registration, extension in the normal browser or OS/browser policy was installed. Test-owned UI/host/Chromium processes were stopped; final process inspection found no matching test instances. Temporary data remains for diagnosis.
 
-Still a developer alpha. Installed native transport, real permission dialogs, live YouTube/SPA/media, remaining restart/offline recovery cases, Windows 11/sleep/reboot, app/service enforcement, accessibility and packaging remain open. See [STATUS](../STATUS.md) and [BACKLOG](../BACKLOG.md).
+Still a developer alpha. Installed native transport, real permission dialogs, live YouTube/SPA/media, remaining restart/offline recovery cases, Windows 11/sleep/reboot, app/service enforcement, accessibility and packaging remain open. See [STATUS](../../STATUS.md) and [BACKLOG](../BACKLOG.md).

@@ -2,7 +2,7 @@
 
 The milestone IDs and acceptance IDs come from `lockin_full_scale_build_plan (1).md`.
 
-Current progress (handoff 19): R18-2/R18-3 fixed with regression checks; the expanded desktop design check now passes with test-owned window restoration (R18-6). Release build, 49 .NET tests, 13 policy/content-script tests, 11 browser tests and all four desktop walkthroughs pass. Installed Brave pairing passed in handoff 14; permission/activation/release and live YouTube acceptance remain open. M3/M4 are not fully accepted. See [fix report](progress/2026-10-01-19-review-fixes.md) and [status](STATUS.md).
+Current progress (handoff 19): R18-2/R18-3 fixed with regression checks; the expanded desktop design check now passes with test-owned window restoration (R18-6). Release build, 49 .NET tests, 13 policy/content-script tests, 11 browser tests and all four desktop walkthroughs pass. Installed Brave pairing passed in handoff 14; permission/activation/release and live YouTube acceptance remain open. M3/M4 are not fully accepted. See [fix report](progress/2026-10-01-19-review-fixes.md) and [status](../STATUS.md).
 
 ## Next work, in order
 

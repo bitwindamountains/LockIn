@@ -37,11 +37,11 @@ The browser recovery actor is simulated through an isolated pipe/database and ap
 
 ## Screenshots
 
-![Named first-use draft](../images/ui17-first-use.png)
+![Named first-use draft](../../images/ui17-first-use.png)
 
-![Structured session review](../images/ui17-review.png)
+![Structured session review](../../images/ui17-review.png)
 
-![Compact review](../images/ui17-review-compact.png)
+![Compact review](../../images/ui17-review-compact.png)
 
 ## Owner handoff
 

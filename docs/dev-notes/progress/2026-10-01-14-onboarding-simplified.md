@@ -32,7 +32,7 @@ This is real Brave lookup/pairing evidence, unlike the earlier direct-executable
 
 The initial desktop walkthrough looked for the review only once, then waited for a native dialog. Automatic staging added an asynchronous step before the inline review. Updated the harness to wait for either actual confirmation surface; the recovery rerun passed without weakening assertions. Evidence: `%TEMP%\lockin-ui-01c53f4623824bbfaacfb09f73ee0ea7`.
 
-![Installed Brave popup after pairing](../images/brave-connected-2026-10-01.png)
+![Installed Brave popup after pairing](../../images/brave-connected-2026-10-01.png)
 
 ## Remaining limits
 

@@ -4,8 +4,8 @@
 
 ## Orientation
 
-- Spec: `lockin_full_scale_build_plan (1).md`. Current state: `docs/STATUS.md`. Decisions: `docs/DECISIONS.md`. Latest handoff: `docs/progress/2026-10-17-21-ship-review-hardening-and-polish.md`.
-- Active work items and acceptance criteria: `SPEC.md` and `tasks/plan.md` / `tasks/todo.md`.
+- Spec: `docs/dev-notes/full-scale-build-plan.md`. Current state: `docs/STATUS.md`. Decisions: `docs/DECISIONS.md`. Latest handoff: `docs/dev-notes/progress/2026-10-17-21-ship-review-hardening-and-polish.md`.
+- Active work items and acceptance criteria: `docs/dev-notes/SPEC.md` and `docs/dev-notes/tasks/plan.md` / `docs/dev-notes/tasks/todo.md`.
 - Visual identity is **Eclipse** (owner choice, 2026-10-13); see `docs/DESIGN_SYSTEM.md`. Do not reintroduce the forest-green/paper or lamplit-desk styling, gradient text or meta-labels.
 
 ## Commands (PowerShell, repository root)

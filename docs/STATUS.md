@@ -7,7 +7,7 @@
 ## Accomplished
 
 - **Stale session message fixed (2026-10-18):** the "Simulated session active…" or "Waiting for the browser…" line above the tabs stayed after the session ended, until the window was reopened. It now clears when the host reports the session finished, unless a later message (such as a recovery confirmation) has replaced it. Verified in one window with an isolated one-minute simulation; `dotnet test` (54) and the default desktop harness pass. The harness reopens the window mid-session, so it does not cover this path.
-- **Handoff 21 (2026-10-17):** see the [handoff 21 progress report](progress/2026-10-17-21-ship-review-hardening-and-polish.md).
+- **Handoff 21 (2026-10-17):** see the [handoff 21 progress report](dev-notes/progress/2026-10-17-21-ship-review-hardening-and-polish.md).
   - **Readiness review:** three parallel reviews (code, security, tests) found no new Critical defect, no secrets and no vulnerable dependencies. Production stays blocked by R18-1, R18-4 and R18-5.
   - **Browser-bridge hardening:** only `blocked.html` is web accessible; framed extension pages cannot drive the host. Idle syncs skip the YouTube tab sweep, and each release is acknowledged once per worker. Pairing limits are now tested, and two load-sensitive browser tests have more time.
   - **Eclipse performance:** the desktop corona breathing is capped at 15 fps. With a session active and the window visible, CPU fell from about 3.9% to 1.7% and GPU from 6.6–11.3% to 2.8%.
@@ -27,7 +27,7 @@
 - **R18-3 fixed:** pending review and asynchronous profile operations lock conflicting edits/actions. Save, staging and preparation use a captured profile/revision. Back and countdown cancellation restore editing.
 - **R18-6 verified:** the desktop harness restores only its test window and rejects invalid/minimized captures. Deliberate minimization and the entire expanded design check pass.
 
-See the [handoff 21 progress report](progress/2026-10-17-21-ship-review-hardening-and-polish.md) and the [handoff 20 progress report](progress/2026-10-13-20-review-fixes-and-eclipse.md); handoff 19 is in [progress/2026-10-01-19-review-fixes.md](progress/2026-10-01-19-review-fixes.md). The [full review](progress/2026-10-01-18-full-review.md) remains the historical record of the original findings.
+See the [handoff 21 progress report](dev-notes/progress/2026-10-17-21-ship-review-hardening-and-polish.md) and the [handoff 20 progress report](dev-notes/progress/2026-10-13-20-review-fixes-and-eclipse.md); handoff 19 is in [progress/2026-10-01-19-review-fixes.md](dev-notes/progress/2026-10-01-19-review-fixes.md). The [full review](dev-notes/progress/2026-10-01-18-full-review.md) remains the historical record of the original findings.
 
 ## Latest verification
 

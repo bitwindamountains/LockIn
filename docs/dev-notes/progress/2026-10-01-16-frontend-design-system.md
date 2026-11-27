@@ -2,7 +2,7 @@
 
 ## Audit before code
 
-Read the owner's attached brief, the build plan, status/decisions and actual WPF/extension frontend code. Published a concrete audit table before implementation. The [audit](../UI_AUDIT_16.md) maps each screen to its user task and observed issues. The [design system](../DESIGN_SYSTEM.md) records the resulting visual and interaction rules.
+Read the owner's attached brief, the build plan, status/decisions and actual WPF/extension frontend code. Published a concrete audit table before implementation. The [audit](../UI_AUDIT_16.md) maps each screen to its user task and observed issues. The [design system](../../DESIGN_SYSTEM.md) records the resulting visual and interaction rules.
 
 ## Implemented
 
@@ -48,21 +48,21 @@ Browser evidence is in `extension/test-results` (existing suite) and `extension/
 
 ### Profile editor and journal
 
-![Tag-first profile editor](../images/ui16-editor.png)
+![Tag-first profile editor](../../images/ui16-editor.png)
 
-![Session journal with filters expanded](../images/ui16-history.png)
+![Session journal with filters expanded](../../images/ui16-history.png)
 
 ### Browser study page
 
-![Wide study page](../images/ui16-study-wide.png)
+![Wide study page](../../images/ui16-study-wide.png)
 
-![320px study page](../images/ui16-study-320.png)
+![320px study page](../../images/ui16-study-320.png)
 
 ### Compact desktop and popup
 
-![Compact Focus](../images/ui16-focus-compact.png)
+![Compact Focus](../../images/ui16-focus-compact.png)
 
-![320px browser popup](../images/ui16-popup-320.png)
+![320px browser popup](../../images/ui16-popup-320.png)
 
 Screenshots use test data; cancellation feedback is from a deliberate test action. A popup fixture message is simulated, not evidence of the owner's browser state.
 

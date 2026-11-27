@@ -8,7 +8,7 @@ The owner asked to continue until production ready and identify any owner action
 - Confirmed that installed native integration, real desktop-app service enforcement and packaging remain substantial unfinished work; the developer alpha cannot be relabeled production.
 - Measured only about 85 MB free on C: initially, falling to roughly 65 MB. Asked the owner to free 5–10 GB or provide an alternate workspace/test volume.
 - Added a read-only development disk-space guard before desktop walkthroughs, the build/launch helper and native publishing/registration. Chromium tests also check space before creating their disposable profile.
-- Added [production readiness gates](../PRODUCTION_READINESS.md), separating implementation work, verification evidence and owner-dependent setup.
+- Added [production readiness gates](../../PRODUCTION_READINESS.md), separating implementation work, verification evidence and owner-dependent setup.
 - Corrected browser setup navigation documentation to match the redesigned Connections and Help screens.
 
 ## Actual verification

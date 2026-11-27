@@ -28,4 +28,4 @@ No service, native registration, extension in a normal browser, browser/OS polic
 
 ## Remaining project work
 
-This is still a developer alpha. Installed native messaging, live YouTube layouts/SPA/media, worker/browser restart, cross-component recovery, Windows service/app enforcement, packaging and platform/accessibility gates remain unfinished. See [STATUS](../STATUS.md) and [BACKLOG](../BACKLOG.md).
+This is still a developer alpha. Installed native messaging, live YouTube layouts/SPA/media, worker/browser restart, cross-component recovery, Windows service/app enforcement, packaging and platform/accessibility gates remain unfinished. See [STATUS](../../STATUS.md) and [BACKLOG](../BACKLOG.md).

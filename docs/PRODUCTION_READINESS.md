@@ -1,6 +1,6 @@
 # Production readiness gates
 
-Updated 2026-10-01, handoff 19. **Not production ready.** The [full review](progress/2026-10-01-18-full-review.md) found two defects and an incomplete design run; [handoff 19](progress/2026-10-01-19-review-fixes.md) fixes the defects and completes the expanded design checks. This checklist tracks remaining implementation and evidence; it does not substitute for the original plan's acceptance cases.
+Updated 2026-10-01, handoff 19. **Not production ready.** The [full review](dev-notes/progress/2026-10-01-18-full-review.md) found two defects and an incomplete design run; [handoff 19](dev-notes/progress/2026-10-01-19-review-fixes.md) fixes the defects and completes the expanded design checks. This checklist tracks remaining implementation and evidence; it does not substitute for the original plan's acceptance cases.
 
 ## Current environment and owner setup
 

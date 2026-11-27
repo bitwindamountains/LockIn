@@ -40,9 +40,9 @@ Browser-state actors in desktop tests are simulated and use isolated pipes/datab
 
 ## Screenshots
 
-![Wide Focus screen](../images/focus-refactor-wide-2026-10-01.png)
+![Wide Focus screen](../../images/focus-refactor-wide-2026-10-01.png)
 
-![Compact Focus screen](../images/focus-refactor-compact-2026-10-01.png)
+![Compact Focus screen](../../images/focus-refactor-compact-2026-10-01.png)
 
 Screenshots include feedback from a deliberately cancelled test countdown. Profiles and connection actors are test fixtures.
 

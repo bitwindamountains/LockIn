@@ -26,9 +26,9 @@ Verification results are recorded in STATUS.md. Expanded the Windows walkthrough
 
 No backend or browser production code changed in response to the transient failures. Their causes remain unconfirmed. The successful sequential rerun retained all assertions and deadlines.
 
-![Session history](../images/history-2026-09-30.png)
+![Session history](../../images/history-2026-09-30.png)
 
-The screenshot precedes the final clarification that History shows the latest 50 host records. [Final compact editor screenshot](../images/editor-compact-2026-09-30.png).
+The screenshot precedes the final clarification that History shows the latest 50 host records. [Final compact editor screenshot](../../images/editor-compact-2026-09-30.png).
 
 Temporary evidence: `lockin-ui-231d83a56d6a414188482f79095df3a8` (initial failed walkthrough, preserved database), `lockin-ui-07c36e5240bb4d40b8d34aff3100acf3` (passing session/History), `lockin-ui-c223cde404ca4a9e889fde0e037c9f90` (final design).
 
