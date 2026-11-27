@@ -1,5 +1,7 @@
 # LockIn
 
+[![CI](https://github.com/bitwindamountains/LockIn/actions/workflows/ci.yml/badge.svg)](https://github.com/bitwindamountains/LockIn/actions/workflows/ci.yml)
+
 A Windows study-focus app with a browser extension. You set your rules once in a profile (allowed websites, study links, and YouTube videos with an approved hashtag), then start a session. Once it starts, the rules are fixed until it ends, so a tired moment can't undo a good plan.
 
 ![Focus: pick a profile and a length, with the estimated finish time shown before you commit](docs/images/focus.webp)
